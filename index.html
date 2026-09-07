@@ -92,6 +92,11 @@
     font-family:"Fraunces",serif; font-weight:600; font-size:19px; margin:0 0 4px;
   }
   .panel .hint{ font-size:13px; color:var(--ink-muted); margin:0 0 16px; }
+  .paste-guide{
+    font-size:12.5px; color:var(--ink-muted); margin:0 0 12px; padding-left:18px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .paste-guide b{ color:var(--ink); font-weight:600; }
 
   /* ---- Add expense form ---- */
   .form-grid{
@@ -243,8 +248,14 @@
   <main>
     <section class="panel">
       <h2>貼上資料，自動入晒</h2>
-      <p class="hint">將成段記錄直接貼落嚟，格式跟返：「Pay by / Paid by 邊個」→「出席：邊啲人」→「項目 金額（$ 或 ¥）」，每段之間用一行 --- 分隔。撳「自動入資料」就會逐段幫你加做開支。</p>
-      <textarea id="pasteBox" rows="7" placeholder="例如：&#10;Pay by wing&#10;出席：wing Leo Yandy&#10;汶和記 $1553.54&#10;---&#10;Paid by Yandy&#10;出席：wing Yandy QQ&#10;Drink ¥220.24"></textarea>
+      <p class="hint">跟住呢個格式貼一段（順序唔可以亂，但關鍵字唔使一模一樣），撳「自動入資料」就會逐段幫你加做開支：</p>
+      <ul class="paste-guide">
+        <li><b>邊個找數</b>：「Pay by」「Paid by」「找數」「找數人」「俾錢」「畀錢」「比錢」「付款」+ 冒號 + 名</li>
+        <li><b>邊個有份</b>：「出席」「在場」「attend／attendee／attendees」「present」+ 冒號 + 名（用空格、逗號或頓號分開）</li>
+        <li><b>項目金額</b>：$ 當港幣；¥／CNY／RMB／人民幣會自動用匯率換做港幣；可以直接寫加數，例如 360+120</li>
+        <li>每段之間用一行 --- 分隔（唔打都得，見到新嘅「找數」關鍵字就當開新一段）</li>
+      </ul>
+      <textarea id="pasteBox" rows="7" placeholder="例如：&#10;找數：阿明&#10;出席：阿明 阿芳 阿強&#10;晚餐 $360&#10;---&#10;Paid by 阿芳&#10;attend：阿明 阿芳 阿玲&#10;飲品 ¥88"></textarea>
       <div class="actions-row">
         <button type="button" class="btn" id="parsePasteBtn">自動入資料</button>
         <span class="export-status" id="parseStatus" aria-live="polite"></span>
@@ -474,12 +485,12 @@
     function matchPayer(line){
       var m = line.match(/^(?:pay|paid)\s*by[:：]?\s*(.+)$/i);
       if (m) return m[1].trim();
-      m = line.match(/^(?:俾錢|畀錢|付款|找數(?:人)?)[:：]\s*(.+)$/);
+      m = line.match(/^(?:俾錢|畀錢|比錢|付款|找數(?:人)?)[:：]\s*(.+)$/);
       if (m) return m[1].trim();
       return null;
     }
     function matchAttendees(line){
-      var m = line.match(/^(?:出席|在場|attendees?|present)[:：]\s*(.+)$/i);
+      var m = line.match(/^(?:出席|在場|attend(?:ees?)?|present)[:：]\s*(.+)$/i);
       return m ? m[1].trim() : null;
     }
 
