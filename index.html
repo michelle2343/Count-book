@@ -264,6 +264,7 @@
           <label>邊啲人有份（撳一下加入／剔走）</label>
           <div class="attendees" id="attendeesBox"></div>
           <p class="hint" id="noPeopleHint" style="margin:6px 0 0" hidden>未有人嘅名，先喺下面加返幾個人。</p>
+          <p class="hint" id="attendeesRequiredHint" style="margin:6px 0 0;color:var(--debit)" hidden>要剔返至少一個人，先分攤到呢筆開支（找數嗰個人如果冇消費，唔使剔佢）。</p>
         </div>
         <div class="add-person-row">
           <input type="text" id="newPersonInput" placeholder="加新名字…" />
@@ -413,9 +414,14 @@
     var attendees = Array.prototype.slice.call(document.querySelectorAll('input[name="attendee"]:checked')).map(function(i){ return i.value; });
 
     if(!label || isNaN(amount) || amount <= 0 || !payer){ return; }
-    if(attendees.length === 0){ attendees = [payer]; }
-    if(attendees.indexOf(payer) === -1){ attendees.push(payer); }
+    if(attendees.length === 0){
+      document.getElementById("attendeesRequiredHint").hidden = false;
+      return;
+    }
+    document.getElementById("attendeesRequiredHint").hidden = true;
 
+    // The payer isn't auto-added to the split — someone can pay for a group they
+    // aren't personally part of (e.g. covering a taxi they didn't ride in).
     state.expenses.push({ label:label, note:"", payer:payer, currency:currency, amount:amount, attendees:attendees });
     saveState();
 
