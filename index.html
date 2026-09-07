@@ -1,0 +1,846 @@
+<title>計數本</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#eef0ec;
+    --surface:#ffffff;
+    --ink:#1f2a24;
+    --ink-muted:#5c6b60;
+    --line:#d7ddd3;
+    --accent:#2f6f5e;
+    --accent-soft:#e1ebe6;
+    --credit:#2f6f5e;
+    --debit:#b5482e;
+    --debit-soft:#f6e6e1;
+    --credit-soft:#e1ebe6;
+    --focus:#2f6f5e;
+    --shadow: 0 1px 2px rgba(31,42,36,.06), 0 8px 24px -12px rgba(31,42,36,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#141815;
+      --surface:#1b211d;
+      --ink:#e8eae4;
+      --ink-muted:#9aa69c;
+      --line:#2a302b;
+      --accent:#5fb79a;
+      --accent-soft:#213029;
+      --credit:#5fb79a;
+      --debit:#e08165;
+      --debit-soft:#2f231e;
+      --credit-soft:#1c2b24;
+      --focus:#5fb79a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#141815;
+    --surface:#1b211d;
+    --ink:#e8eae4;
+    --ink-muted:#9aa69c;
+    --line:#2a302b;
+    --accent:#5fb79a;
+    --accent-soft:#213029;
+    --credit:#5fb79a;
+    --debit:#e08165;
+    --debit-soft:#2f231e;
+    --credit-soft:#1c2b24;
+    --focus:#5fb79a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", "Noto Sans TC", system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family:"IBM Plex Mono","SFMono-Regular",monospace; font-variant-numeric: tabular-nums; }
+  .wrap{ max-width:920px; margin:0 auto; padding:32px 20px 80px; }
+
+  header.page{ margin-bottom:28px; }
+  .eyebrow{
+    font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-muted); font-weight:600; margin:0 0 6px;
+  }
+  h1{
+    font-family:"Fraunces","Noto Serif TC",serif;
+    font-weight:600; font-size:clamp(28px,4vw,38px);
+    margin:0 0 6px; text-wrap:balance;
+  }
+  .sub{ color:var(--ink-muted); font-size:14.5px; margin:0; max-width:60ch; }
+
+  .rate-bar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-top:18px; padding:12px 16px; background:var(--surface);
+    border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow);
+  }
+  .rate-bar label{ font-size:13px; color:var(--ink-muted); }
+  .rate-bar input{
+    width:100px; font-family:"IBM Plex Mono",monospace; font-size:14px;
+    padding:6px 8px; border:1px solid var(--line); border-radius:7px;
+    background:var(--paper); color:var(--ink);
+  }
+  .rate-bar .rate-note{ font-size:12.5px; color:var(--ink-muted); margin-left:auto; }
+
+  section.panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    padding:22px 22px 24px; margin-bottom:20px; box-shadow:var(--shadow);
+  }
+  .panel h2{
+    font-family:"Fraunces",serif; font-weight:600; font-size:19px; margin:0 0 4px;
+  }
+  .panel .hint{ font-size:13px; color:var(--ink-muted); margin:0 0 16px; }
+
+  /* ---- Add expense form ---- */
+  .form-grid{
+    display:grid; grid-template-columns: 1.3fr 1fr 1fr; gap:12px 14px;
+  }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size:12.5px; color:var(--ink-muted); font-weight:500; }
+  .field input[type=text], .field input[type=number]{
+    padding:9px 10px; border:1px solid var(--line); border-radius:9px;
+    background:var(--paper); color:var(--ink); font-size:14.5px;
+    font-family:inherit;
+  }
+  .field input:focus, .seg input:focus + span{ outline:2px solid var(--focus); outline-offset:1px; }
+  select{
+    padding:9px 10px; border:1px solid var(--line); border-radius:9px;
+    background:var(--paper); color:var(--ink); font-size:14.5px; font-family:inherit;
+  }
+  .seg{ display:inline-flex; border:1px solid var(--line); border-radius:9px; overflow:hidden; width:fit-content; }
+  .seg input{ position:absolute; opacity:0; pointer-events:none; }
+  .seg span{
+    padding:9px 16px; font-size:14px; cursor:pointer; color:var(--ink-muted); font-weight:500;
+    font-family:"IBM Plex Mono",monospace;
+  }
+  .seg input:checked + span{ background:var(--accent); color:#fff; }
+  .seg label{ position:relative; display:block; }
+
+  .attendees{ display:flex; flex-wrap:wrap; gap:7px; margin-top:4px; }
+  .chip{ position:relative; }
+  .chip input{ position:absolute; opacity:0; pointer-events:none; }
+  .chip span{
+    display:inline-block; padding:6px 12px; border-radius:999px;
+    border:1px solid var(--line); font-size:13.5px; cursor:pointer;
+    color:var(--ink-muted); background:var(--paper); user-select:none;
+  }
+  .chip input:checked + span{
+    background:var(--accent-soft); color:var(--accent); border-color:var(--accent);
+    font-weight:600;
+  }
+
+  .add-person-row{ display:flex; gap:8px; margin-top:12px; align-items:center; }
+  .add-person-row input{ flex:1; max-width:200px; }
+
+  .btn{
+    padding:9px 16px; border-radius:9px; border:1px solid var(--accent);
+    background:var(--accent); color:#fff; font-size:14px; font-weight:600;
+    cursor:pointer; font-family:inherit;
+  }
+  .btn:hover{ filter:brightness(1.06); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; filter:none; }
+  .btn.secondary{ background:transparent; color:var(--accent); }
+  .btn.ghost{ background:transparent; color:var(--ink-muted); border-color:var(--line); }
+  .btn.small{ padding:5px 10px; font-size:12.5px; }
+  .actions-row{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center; }
+  .export-status{ font-size:12.5px; color:var(--ink-muted); }
+  .export-status.error{ color:var(--debit); }
+  .export-status.ok{ color:var(--credit); }
+
+  /* ---- Ledger ---- */
+  .payer-group{ margin-bottom:18px; }
+  .payer-group:last-child{ margin-bottom:0; }
+  .payer-head{
+    display:flex; align-items:baseline; gap:8px; margin-bottom:8px;
+    padding-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  .payer-head .name{ font-weight:600; font-size:14.5px; }
+  .payer-head .tag{ font-size:11.5px; color:var(--ink-muted); }
+  .payer-head .subtotal{ margin-left:auto; font-size:14px; }
+
+  .expense-row{
+    display:grid; grid-template-columns: 1fr auto auto auto; align-items:center;
+    gap:10px 14px; padding:9px 0; border-bottom:1px dashed var(--line);
+  }
+  .expense-row:last-child{ border-bottom:none; }
+  .expense-row .label{ font-size:14.5px; }
+  .expense-row .note{ display:block; font-size:12px; color:var(--ink-muted); margin-top:2px; }
+  .expense-row .attendees-line{ display:block; font-size:12px; color:var(--ink-muted); margin-top:2px; }
+  .expense-row .amount{ font-size:14.5px; text-align:right; white-space:nowrap; }
+  .expense-row .amount .orig{ display:block; font-size:11.5px; color:var(--ink-muted); }
+  .del-btn{
+    background:none; border:none; color:var(--ink-muted); cursor:pointer;
+    font-size:16px; line-height:1; padding:4px 6px; border-radius:6px;
+  }
+  .del-btn:hover{ background:var(--debit-soft); color:var(--debit); }
+
+  /* ---- Balances ---- */
+  .balance-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px;
+  }
+  .balance-tile{
+    border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+    display:flex; flex-direction:column; gap:4px; background:var(--paper);
+  }
+  .balance-tile .name{ font-size:13.5px; font-weight:600; }
+  .balance-tile .amt{ font-size:17px; font-weight:600; }
+  .balance-tile .status{ font-size:11px; letter-spacing:.03em; text-transform:uppercase; }
+  .balance-tile.credit{ border-color: color-mix(in srgb, var(--credit) 35%, var(--line)); }
+  .balance-tile.debit{ border-color: color-mix(in srgb, var(--debit) 35%, var(--line)); }
+  .balance-tile.credit .amt, .balance-tile.credit .status{ color:var(--credit); }
+  .balance-tile.debit .amt, .balance-tile.debit .status{ color:var(--debit); }
+  .balance-tile.even .amt, .balance-tile.even .status{ color:var(--ink-muted); }
+
+  /* ---- Settlement ---- */
+  .settle-row{
+    display:flex; align-items:center; gap:12px; padding:10px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .settle-row:last-child{ border-bottom:none; }
+  .settle-row input[type=checkbox]{ width:17px; height:17px; accent-color:var(--accent); flex:none; }
+  .settle-row .flow{ flex:1; font-size:14.5px; display:flex; align-items:center; gap:8px; }
+  .settle-row .flow .arrow{ color:var(--ink-muted); }
+  .settle-row .flow .who{ font-weight:600; }
+  .settle-row .amt{ font-size:15px; font-weight:600; color:var(--debit); }
+  .settle-row.done{ opacity:.45; }
+  .settle-row.done .flow, .settle-row.done .amt{ text-decoration:line-through; }
+  .settle-empty{ color:var(--ink-muted); font-size:14px; padding:6px 0; }
+
+  footer.note{
+    text-align:center; color:var(--ink-muted); font-size:12px; margin-top:8px;
+  }
+
+  @media (max-width:640px){
+    .form-grid{ grid-template-columns:1fr 1fr; }
+    .form-grid .field.full{ grid-column:1/-1; }
+    .expense-row{ grid-template-columns:1fr auto; }
+    .expense-row .amount{ grid-column:1/2; text-align:left; }
+    .expense-row .del{ grid-column:2/3; grid-row:1/2; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="page">
+    <p class="eyebrow">分帳工具</p>
+    <h1>計數本</h1>
+    <p class="sub">記低邊個找數、邊個食咗乜，自動幫你分帳同埋計返實際要找返幾多。人民幣會自動幫你換算做港幣。</p>
+    <div class="rate-bar">
+      <label for="rateInput">匯率　1 ¥ CNY =</label>
+      <input type="number" id="rateInput" step="0.00001" />
+      <label for="rateInput">$ HKD</label>
+      <span class="rate-note">凡標 ¥ 嘅開支會自動換算；標 $ 嘅開支當已經係港幣，唔會再換算。</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>新增開支</h2>
+      <p class="hint">邊個找數、邊個有份食／搭，寫低就得。</p>
+      <form id="expenseForm">
+        <div class="form-grid">
+          <div class="field full" style="grid-column:1/-1">
+            <label for="labelInput">項目名稱</label>
+            <input type="text" id="labelInput" placeholder="例如：燒烤、Taxi、按摩" required />
+          </div>
+          <div class="field">
+            <label for="payerSelect">邊個找數</label>
+            <select id="payerSelect"></select>
+          </div>
+          <div class="field">
+            <label for="amountInput">金額</label>
+            <input type="number" id="amountInput" step="0.01" min="0" placeholder="0.00" required />
+          </div>
+          <div class="field">
+            <label>貨幣</label>
+            <div class="seg">
+              <label><input type="radio" name="currency" value="HKD" checked><span>$ HKD</span></label>
+              <label><input type="radio" name="currency" value="CNY"><span>¥ CNY</span></label>
+            </div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:14px">
+          <label>邊啲人有份（撳一下加入／剔走）</label>
+          <div class="attendees" id="attendeesBox"></div>
+          <p class="hint" id="noPeopleHint" style="margin:6px 0 0" hidden>未有人嘅名，先喺下面加返幾個人。</p>
+        </div>
+        <div class="add-person-row">
+          <input type="text" id="newPersonInput" placeholder="加新名字…" />
+          <button type="button" class="btn ghost small" id="addPersonBtn">＋ 加人</button>
+        </div>
+        <div class="actions-row">
+          <button type="submit" class="btn" id="submitExpenseBtn">加入呢筆開支</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>帳目明細</h2>
+      <p class="hint">按找數人分組，顯示每筆開支同分攤人數。</p>
+      <div id="ledger"></div>
+    </section>
+
+    <section class="panel">
+      <h2>每人結餘</h2>
+      <p class="hint">正數（綠色）＝應該收返錢；負數（橙色）＝仲欠緊錢。</p>
+      <div class="balance-grid" id="balanceGrid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>埋單方案</h2>
+      <p class="hint">最少轉帳次數嘅找數建議，剔咗代表已經找咗。</p>
+      <div id="settlement"></div>
+    </section>
+
+    <div class="actions-row">
+      <button class="btn ghost small" id="clearAllBtn">清空全部，開新一輪</button>
+      <button class="btn ghost small" id="exportXlsxBtn" hidden>⇩ 匯出做 Excel／Google Sheet（.xlsx）</button>
+      <span class="export-status" id="exportStatus" aria-live="polite"></span>
+    </div>
+  </main>
+
+  <footer class="note">資料只存喺你呢部裝置嘅瀏覽器入面（localStorage），唔會上傳去任何地方。匯出嘅 Excel 檔可以直接用 Google Sheet 打開（Drive →「匯入」）。</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "count-book:v1";
+  var DEFAULT_RATE = 1.17872;
+
+  function samplePeople(){
+    return [];
+  }
+
+  function sampleExpenses(){
+    return [];
+  }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var s = JSON.parse(raw);
+        if(s && Array.isArray(s.people) && Array.isArray(s.expenses)){
+          if(typeof s.rate !== "number") s.rate = DEFAULT_RATE;
+          if(!s.settledPairs) s.settledPairs = [];
+          return s;
+        }
+      }
+    }catch(e){}
+    return { rate: DEFAULT_RATE, people: samplePeople(), expenses: sampleExpenses(), settledPairs: [] };
+  }
+
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  var state = loadState();
+
+  function fmt(n){
+    var v = Math.round((n + Number.EPSILON) * 100) / 100;
+    var sign = v < 0 ? "−" : "";
+    return sign + "$" + Math.abs(v).toFixed(2);
+  }
+
+  function toHKD(amount, currency){
+    return currency === "CNY" ? amount * state.rate : amount;
+  }
+
+  // ---------- rendering: rate bar ----------
+  var rateInput = document.getElementById("rateInput");
+  rateInput.value = state.rate;
+  rateInput.addEventListener("input", function(){
+    var v = parseFloat(rateInput.value);
+    state.rate = isNaN(v) ? DEFAULT_RATE : v;
+    saveState();
+    renderAll();
+  });
+
+  // ---------- payer select + attendee chips ----------
+  var payerSelect = document.getElementById("payerSelect");
+  var attendeesBox = document.getElementById("attendeesBox");
+
+  function renderPeoplePickers(){
+    var hasPeople = state.people.length > 0;
+    payerSelect.innerHTML = "";
+    state.people.forEach(function(p){
+      var o = document.createElement("option");
+      o.value = p; o.textContent = p;
+      payerSelect.appendChild(o);
+    });
+    payerSelect.disabled = !hasPeople;
+
+    attendeesBox.innerHTML = "";
+    state.people.forEach(function(p){
+      var wrap = document.createElement("label");
+      wrap.className = "chip";
+      var input = document.createElement("input");
+      input.type = "checkbox"; input.value = p; input.name = "attendee";
+      var span = document.createElement("span");
+      span.textContent = p;
+      wrap.appendChild(input); wrap.appendChild(span);
+      attendeesBox.appendChild(wrap);
+    });
+
+    document.getElementById("noPeopleHint").hidden = hasPeople;
+    document.getElementById("submitExpenseBtn").disabled = !hasPeople;
+  }
+
+  document.getElementById("addPersonBtn").addEventListener("click", function(){
+    var input = document.getElementById("newPersonInput");
+    var name = input.value.trim();
+    if(!name) return;
+    if(state.people.indexOf(name) === -1){
+      state.people.push(name);
+      saveState();
+      renderPeoplePickers();
+    }
+    input.value = "";
+  });
+
+  // ---------- add expense form ----------
+  document.getElementById("expenseForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var label = document.getElementById("labelInput").value.trim();
+    var amount = parseFloat(document.getElementById("amountInput").value);
+    var currency = document.querySelector('input[name="currency"]:checked').value;
+    var payer = payerSelect.value;
+    var attendees = Array.prototype.slice.call(document.querySelectorAll('input[name="attendee"]:checked')).map(function(i){ return i.value; });
+
+    if(!label || isNaN(amount) || amount <= 0 || !payer){ return; }
+    if(attendees.length === 0){ attendees = [payer]; }
+    if(attendees.indexOf(payer) === -1){ attendees.push(payer); }
+
+    state.expenses.push({ label:label, note:"", payer:payer, currency:currency, amount:amount, attendees:attendees });
+    saveState();
+
+    e.target.reset();
+    document.querySelector('input[name="currency"][value="HKD"]').checked = true;
+    renderPeoplePickers();
+    renderAll();
+  });
+
+  document.getElementById("clearAllBtn").addEventListener("click", function(){
+    state = { rate: state.rate, people: [], expenses: [], settledPairs: [] };
+    saveState();
+    renderPeoplePickers();
+    renderAll();
+  });
+
+  // ---------- ledger ----------
+  var ledgerEl = document.getElementById("ledger");
+
+  function renderLedger(){
+    ledgerEl.innerHTML = "";
+    if(state.expenses.length === 0){
+      ledgerEl.innerHTML = '<p class="settle-empty">重未有任何開支，喺上面加返第一筆啦。</p>';
+      return;
+    }
+    var byPayer = {};
+    var order = [];
+    state.expenses.forEach(function(ex, idx){
+      if(!byPayer[ex.payer]){ byPayer[ex.payer] = []; order.push(ex.payer); }
+      byPayer[ex.payer].push(idx);
+    });
+
+    order.forEach(function(payer){
+      var group = document.createElement("div");
+      group.className = "payer-group";
+
+      var subtotal = 0;
+      byPayer[payer].forEach(function(idx){
+        subtotal += toHKD(state.expenses[idx].amount, state.expenses[idx].currency);
+      });
+
+      var head = document.createElement("div");
+      head.className = "payer-head";
+      head.innerHTML = '<span class="name">' + payer + ' 找數</span>' +
+        '<span class="tag">' + byPayer[payer].length + ' 筆</span>' +
+        '<span class="subtotal mono">' + fmt(subtotal) + '</span>';
+      group.appendChild(head);
+
+      byPayer[payer].forEach(function(idx){
+        var ex = state.expenses[idx];
+        var hkd = toHKD(ex.amount, ex.currency);
+        var each = hkd / ex.attendees.length;
+
+        var row = document.createElement("div");
+        row.className = "expense-row";
+
+        var labelCell = document.createElement("div");
+        var noteHtml = ex.note ? '<span class="note">' + escapeHtml(ex.note) + (ex.currency==="CNY" ? " ¥" : "") + '</span>' : "";
+        labelCell.innerHTML = '<span class="label">' + escapeHtml(ex.label) + '</span>' + noteHtml +
+          '<span class="attendees-line">' + ex.attendees.join("、") + '（' + ex.attendees.length + ' 人分）</span>';
+
+        var amountCell = document.createElement("div");
+        amountCell.className = "amount mono";
+        var origLine = ex.currency === "CNY" ? '<span class="orig">¥' + ex.amount.toFixed(2) + ' → 已換算</span>' : "";
+        amountCell.innerHTML = fmt(hkd) + origLine + '<span class="orig">每人 ' + fmt(each) + '</span>';
+
+        var spacer = document.createElement("div");
+
+        var delCell = document.createElement("div");
+        delCell.className = "del";
+        var delBtn = document.createElement("button");
+        delBtn.type = "button"; delBtn.className = "del-btn"; delBtn.title = "刪除呢筆"; delBtn.innerHTML = "✕";
+        delBtn.addEventListener("click", function(){
+          state.expenses.splice(idx, 1);
+          saveState();
+          renderAll();
+        });
+        delCell.appendChild(delBtn);
+
+        row.appendChild(labelCell);
+        row.appendChild(amountCell);
+        row.appendChild(spacer);
+        row.appendChild(delCell);
+        group.appendChild(row);
+      });
+
+      ledgerEl.appendChild(group);
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---------- balances ----------
+  function computeBalances(){
+    var balances = {};
+    state.people.forEach(function(p){ balances[p] = 0; });
+
+    state.expenses.forEach(function(ex){
+      var hkd = toHKD(ex.amount, ex.currency);
+      if(balances[ex.payer] === undefined) balances[ex.payer] = 0;
+      balances[ex.payer] += hkd;
+      var each = hkd / ex.attendees.length;
+      ex.attendees.forEach(function(p){
+        if(balances[p] === undefined) balances[p] = 0;
+        balances[p] -= each;
+      });
+    });
+
+    Object.keys(balances).forEach(function(p){
+      balances[p] = Math.round((balances[p] + Number.EPSILON) * 100) / 100;
+    });
+    return balances;
+  }
+
+  var balanceGrid = document.getElementById("balanceGrid");
+  function renderBalances(balances){
+    balanceGrid.innerHTML = "";
+    var names = Object.keys(balances).sort(function(a,b){ return balances[b] - balances[a]; });
+    names.forEach(function(name){
+      var v = balances[name];
+      var tile = document.createElement("div");
+      var cls = v > 0.004 ? "credit" : (v < -0.004 ? "debit" : "even");
+      tile.className = "balance-tile " + cls;
+      var status = cls === "credit" ? "應收" : (cls === "debit" ? "應找" : "剛剛好");
+      tile.innerHTML = '<span class="name">' + escapeHtml(name) + '</span>' +
+        '<span class="amt mono">' + fmt(Math.abs(v)) + '</span>' +
+        '<span class="status">' + status + '</span>';
+      balanceGrid.appendChild(tile);
+    });
+  }
+
+  // ---------- settlement (min cash flow, greedy) ----------
+  function computeSettlement(balances){
+    var creditors = [], debtors = [];
+    Object.keys(balances).forEach(function(p){
+      var v = balances[p];
+      if(v > 0.004) creditors.push([p, v]);
+      else if(v < -0.004) debtors.push([p, -v]);
+    });
+    creditors.sort(function(a,b){ return b[1]-a[1]; });
+    debtors.sort(function(a,b){ return b[1]-a[1]; });
+
+    var tx = [];
+    var i=0, j=0;
+    while(i < debtors.length && j < creditors.length){
+      var d = debtors[i], c = creditors[j];
+      var amt = Math.min(d[1], c[1]);
+      tx.push({ from:d[0], to:c[0], amount: Math.round((amt+Number.EPSILON)*100)/100 });
+      d[1] -= amt; c[1] -= amt;
+      if(d[1] <= 0.005) i++;
+      if(c[1] <= 0.005) j++;
+    }
+    return tx;
+  }
+
+  var settlementEl = document.getElementById("settlement");
+  function renderSettlement(tx){
+    settlementEl.innerHTML = "";
+    if(tx.length === 0){
+      settlementEl.innerHTML = '<p class="settle-empty">目前帳目打和，唔使再找數。</p>';
+      return;
+    }
+    tx.forEach(function(t){
+      var key = t.from + "→" + t.to;
+      var row = document.createElement("div");
+      var done = state.settledPairs.indexOf(key) !== -1;
+      row.className = "settle-row" + (done ? " done" : "");
+
+      var cb = document.createElement("input");
+      cb.type = "checkbox"; cb.checked = done;
+      cb.addEventListener("change", function(){
+        var idx = state.settledPairs.indexOf(key);
+        if(cb.checked && idx === -1) state.settledPairs.push(key);
+        if(!cb.checked && idx !== -1) state.settledPairs.splice(idx,1);
+        saveState();
+        renderSettlement(tx);
+      });
+
+      var flow = document.createElement("div");
+      flow.className = "flow";
+      flow.innerHTML = '<span class="who">' + escapeHtml(t.from) + '</span><span class="arrow">→</span><span class="who">' + escapeHtml(t.to) + '</span>';
+
+      var amt = document.createElement("div");
+      amt.className = "amt mono";
+      amt.textContent = fmt(t.amount);
+
+      row.appendChild(cb);
+      row.appendChild(flow);
+      row.appendChild(amt);
+      settlementEl.appendChild(row);
+    });
+  }
+
+  function renderAll(){
+    renderLedger();
+    var balances = computeBalances();
+    renderBalances(balances);
+    renderSettlement(computeSettlement(balances));
+  }
+
+  // ---------- export to Excel / Google Sheet (.xlsx, with live formulas) ----------
+  var exportBtn = document.getElementById("exportXlsxBtn");
+  var exportStatus = document.getElementById("exportStatus");
+  var downloadsCap = null;
+
+  function setExportStatus(text, kind){
+    exportStatus.textContent = text || "";
+    exportStatus.className = "export-status" + (kind ? " " + kind : "");
+  }
+
+  function buildWorkbookBlob(){
+    var people = state.people;
+    var expenses = state.expenses;
+    var FIXED_COLS = 8; // A..H
+    function col(i){ return FIXED_COLS + i; }
+    function addr(r0, c0){ return XLSX.utils.encode_cell({ r: r0, c: c0 }); }
+
+    var ws = {};
+    function setS(r0, c0, v){ ws[addr(r0, c0)] = { t: "s", v: String(v) }; }
+    function setN(r0, c0, v, fmt){ var cell = { t: "n", v: v }; if (fmt) cell.z = fmt; ws[addr(r0, c0)] = cell; }
+    function setB(r0, c0, v){ ws[addr(r0, c0)] = { t: "b", v: !!v }; }
+    function setF(r0, c0, formula, cachedVal, fmt){
+      var t = typeof cachedVal === "boolean" ? "b" : (typeof cachedVal === "string" ? "str" : "n");
+      var cell = { t: t, f: formula, v: cachedVal };
+      if (fmt) cell.z = fmt;
+      ws[addr(r0, c0)] = cell;
+    }
+
+    setS(0, 0, "計數本 — 分帳核數表");
+    setS(2, 0, "匯率　1 ¥ CNY =");
+    setN(2, 1, state.rate, "0.00000");
+    setS(2, 2, "$ HKD　　（改呢個數，成張表自動重算）");
+    setS(4, 0, "① 開支明細");
+
+    var headers = ["項目", "備註（原始金額）", "找數人", "貨幣", "原金額", "港幣金額", "有份人數", "每人分攤"].concat(people);
+    headers.forEach(function(h, i){ setS(5, i, h); });
+
+    var firstDataRow0 = 6;
+    var firstPLetter = XLSX.utils.encode_col(col(0));
+    var lastPLetter = XLSX.utils.encode_col(col(Math.max(people.length - 1, 0)));
+
+    expenses.forEach(function(ex, i){
+      var r0 = firstDataRow0 + i;
+      var rowNum = r0 + 1;
+      setS(r0, 0, ex.label);
+      setS(r0, 1, ex.note || "");
+      setS(r0, 2, ex.payer);
+      setS(r0, 3, ex.currency);
+      setN(r0, 4, ex.amount, "0.00");
+      var hkd = toHKD(ex.amount, ex.currency);
+      setF(r0, 5, 'IF(D' + rowNum + '="CNY",E' + rowNum + '*$B$3,E' + rowNum + ')', hkd, "$#,##0.00");
+      setF(r0, 6, "COUNTIF(" + firstPLetter + rowNum + ":" + lastPLetter + rowNum + ",TRUE)", ex.attendees.length);
+      var each = hkd / ex.attendees.length;
+      setF(r0, 7, "F" + rowNum + "/G" + rowNum, each, "$#,##0.00");
+      people.forEach(function(p, pi){ setB(r0, col(pi), ex.attendees.indexOf(p) !== -1); });
+    });
+
+    var lastDataRow0 = firstDataRow0 + Math.max(expenses.length, 1) - 1;
+    var subtotalRow0 = lastDataRow0 + 1;
+    setS(subtotalRow0, 0, "總開支（港幣）");
+    var totalHKD = expenses.reduce(function(s, ex){ return s + toHKD(ex.amount, ex.currency); }, 0);
+    setF(subtotalRow0, 5, "SUM(F" + (firstDataRow0 + 1) + ":F" + (lastDataRow0 + 1) + ")", totalHKD, "$#,##0.00");
+
+    // ② 每人結餘 and ③ 埋單建議 are real formulas (SUMIF / SUMPRODUCT / INDEX-MATCH) so
+    // they can be cross-checked independently of this tool's own JS. The earlier version
+    // came out blank for a viewer: some Excel installs don't recalculate formulas written
+    // by a non-Excel tool and just show whatever cached value ("v") the file carries — an
+    // IF branch cached as "" then renders as a genuinely empty cell. The real fix is to
+    // force recalculation on open (done below via a workbook.xml patch), not to drop the
+    // formulas — dropping them would remove the very thing being cross-checked.
+    var balSectionRow0 = subtotalRow0 + 2;
+    setS(balSectionRow0, 0, "② 每人結餘");
+    var balHeadRow0 = balSectionRow0 + 1;
+    ["姓名", "總共找咗幾多", "自己實際洗咗幾多", "淨結餘", "狀態"].forEach(function(h, i){ setS(balHeadRow0, i, h); });
+
+    var paidMap = {}, consumedMap = {};
+    people.forEach(function(p){ paidMap[p] = 0; consumedMap[p] = 0; });
+    expenses.forEach(function(ex){
+      var hkd = toHKD(ex.amount, ex.currency);
+      paidMap[ex.payer] = (paidMap[ex.payer] || 0) + hkd;
+      var each = hkd / ex.attendees.length;
+      ex.attendees.forEach(function(p){ consumedMap[p] = (consumedMap[p] || 0) + each; });
+    });
+
+    var balFirstRow0 = balHeadRow0 + 1;
+    people.forEach(function(person, pi){
+      var r0 = balFirstRow0 + pi;
+      var rowNum = r0 + 1;
+      var pLetter = XLSX.utils.encode_col(col(pi));
+      setS(r0, 0, person);
+      setF(r0, 1, "SUMIF($C$" + (firstDataRow0 + 1) + ":$C$" + (lastDataRow0 + 1) + ",A" + rowNum + ",$F$" + (firstDataRow0 + 1) + ":$F$" + (lastDataRow0 + 1) + ")", paidMap[person] || 0, "$#,##0.00");
+      // SUMPRODUCT's comma-separated array form doesn't reliably coerce raw boolean
+      // TRUE/FALSE cells to 1/0 — it needs the double-unary "--" to force that
+      // conversion, otherwise every attendee column evaluates as 0 and Consumed
+      // comes out $0.00 for everyone (which is what broke ③ 埋單建議 downstream).
+      setF(r0, 2, "SUMPRODUCT(--$" + pLetter + "$" + (firstDataRow0 + 1) + ":$" + pLetter + "$" + (lastDataRow0 + 1) + ",$H$" + (firstDataRow0 + 1) + ":$H$" + (lastDataRow0 + 1) + ")", consumedMap[person] || 0, "$#,##0.00");
+      var net = (paidMap[person] || 0) - (consumedMap[person] || 0);
+      setF(r0, 3, "B" + rowNum + "-C" + rowNum, net, "$#,##0.00");
+      var status = net > 0.005 ? "應收" : (net < -0.005 ? "應找" : "打和");
+      setF(r0, 4, 'IF(D' + rowNum + '>0.005,"應收",IF(D' + rowNum + '<-0.005,"應找","打和"))', status);
+    });
+    var balLastRow0 = balFirstRow0 + Math.max(people.length, 1) - 1;
+    var totalCheckRow0 = balLastRow0 + 1;
+    setS(totalCheckRow0, 0, "總和核對（應該 = 0）");
+    setF(totalCheckRow0, 3, "SUM(D" + (balFirstRow0 + 1) + ":D" + (balLastRow0 + 1) + ")", 0, "$#,##0.00");
+
+    var creditorName = "";
+    var maxNet = -Infinity;
+    people.forEach(function(p){
+      var n = (paidMap[p] || 0) - (consumedMap[p] || 0);
+      if (n > maxNet){ maxNet = n; creditorName = p; }
+    });
+    setS(balHeadRow0, 6, "應收錢嘅人：");
+    setF(balHeadRow0, 7, "INDEX(A" + (balFirstRow0 + 1) + ":A" + (balLastRow0 + 1) + ",MATCH(MAX(D" + (balFirstRow0 + 1) + ":D" + (balLastRow0 + 1) + "),D" + (balFirstRow0 + 1) + ":D" + (balLastRow0 + 1) + ",0))", creditorName);
+    var creditorCellRef = "$H$" + (balHeadRow0 + 1);
+
+    var setSectionRow0 = totalCheckRow0 + 2;
+    setS(setSectionRow0, 0, "③ 埋單建議");
+    setS(setSectionRow0, 2, "（假設淨數得一個人應收——而家呢批數係咁；如果之後改到多過一個人應收，呢個簡化式唔夠準，請以工具畫面上嘅「最少轉帳」方案為準。）");
+    var setHeadRow0 = setSectionRow0 + 1;
+    ["邊個找數", "找俾邊個", "金額"].forEach(function(h, i){ setS(setHeadRow0, i, h); });
+    var setFirstRow0 = setHeadRow0 + 1;
+    people.forEach(function(person, pi){
+      var r0 = setFirstRow0 + pi;
+      var b0 = balFirstRow0 + pi;
+      var bRowNum = b0 + 1;
+      var net = (paidMap[person] || 0) - (consumedMap[person] || 0);
+      var isDebtor = net < -0.005;
+      setF(r0, 0, "IF(D" + bRowNum + '<-0.005,A' + bRowNum + ',"")', isDebtor ? person : "");
+      setF(r0, 1, "IF(D" + bRowNum + "<-0.005," + creditorCellRef + ',"")', isDebtor ? creditorName : "");
+      setF(r0, 2, "IF(D" + bRowNum + '<-0.005,-D' + bRowNum + ',"")', isDebtor ? -net : "", "$#,##0.00");
+    });
+    var setLastRow0 = setFirstRow0 + Math.max(people.length, 1) - 1;
+    var check2Row0 = setLastRow0 + 1;
+    setS(check2Row0, 0, "埋單總額核對（應該同②嘅應收總額一致）");
+    var sumSettle = people.reduce(function(s, p){
+      var n = (paidMap[p] || 0) - (consumedMap[p] || 0);
+      return s + (n < -0.005 ? -n : 0);
+    }, 0);
+    setF(check2Row0, 2, "SUM(C" + (setFirstRow0 + 1) + ":C" + (setLastRow0 + 1) + ")", sumSettle, "$#,##0.00");
+
+    var maxRow0 = check2Row0;
+    var maxCol0 = Math.max(FIXED_COLS + people.length - 1, FIXED_COLS - 1);
+    ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: maxRow0, c: maxCol0 } });
+    ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
+    ws["!cols"] = headers.map(function(_, i){ return { wch: i < 2 ? 18 : (i < FIXED_COLS ? 11 : 8) }; });
+
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "計數本");
+    // bookSST forces plain text cells through a proper shared-string table (t="s").
+    // Without it SheetJS writes them as t="str" with no <f> — the type OOXML reserves
+    // for a formula's cached string result — which Protected View's lenient preview
+    // still shows, but Excel's real load path drops once you Enable Editing.
+    var wbout = XLSX.write(wb, { bookType: "xlsx", type: "array", bookSST: true });
+    return forceFullRecalcOnOpen(wbout).then(function(patched){
+      return new Blob([patched], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    });
+  }
+
+  // SheetJS's xlsx writer never emits <calcPr>, so a file it writes carries no hint that
+  // Excel should recalculate formulas on open — some Excel installs then just trust the
+  // cached "v" that came with each formula cell. Patch xl/workbook.xml after the fact to
+  // add fullCalcOnLoad="1" so every opener (Excel, Google Sheets, LibreOffice) recomputes
+  // every formula immediately, guaranteeing what's shown matches what the formula says.
+  function forceFullRecalcOnOpen(wbout){
+    if (typeof JSZip === "undefined"){ return Promise.resolve(wbout); }
+    return JSZip.loadAsync(wbout).then(function(zip){
+      var path = "xl/workbook.xml";
+      var file = zip.file(path);
+      if (!file){ return wbout; }
+      return file.async("string").then(function(xml){
+        if (xml.indexOf("<calcPr") === -1){
+          xml = xml.replace("</workbook>", '<calcPr calcId="999999" fullCalcOnLoad="1"/></workbook>');
+        } else {
+          xml = xml.replace(/<calcPr([^\/]*?)\/>/, function(m, attrs){
+            return attrs.indexOf("fullCalcOnLoad") !== -1 ? m : "<calcPr" + attrs + ' fullCalcOnLoad="1"/>';
+          });
+        }
+        zip.file(path, xml);
+        return zip.generateAsync({ type: "uint8array" });
+      });
+    }).catch(function(){ return wbout; });
+  }
+
+  function initDownloadsCapability(){
+    if (!window.claude || typeof window.claude.use !== "function"){ return; }
+    window.claude.use("downloads").then(function(d){
+      downloadsCap = d;
+      if (d){ exportBtn.hidden = false; }
+    }).catch(function(){ /* stay hidden */ });
+  }
+
+  exportBtn.addEventListener("click", function(){
+    if (typeof XLSX === "undefined"){
+      setExportStatus("匯出功能未載入，請刷新頁面再試。", "error");
+      return;
+    }
+    if (state.expenses.length === 0){
+      setExportStatus("重未有開支，加咗先可以匯出。", "error");
+      return;
+    }
+    setExportStatus("匯出緊…", "");
+    var go = downloadsCap ? Promise.resolve(downloadsCap) : window.claude.use("downloads");
+    Promise.all([buildWorkbookBlob(), go]).then(function(results){
+      var blob = results[0], d = results[1];
+      if (!d){ setExportStatus("呢度睇緊嘅環境唔支援匯出檔案。", "error"); return; }
+      downloadsCap = d;
+      return d.save({ filename: "計數本.xlsx", data: blob }).then(function(){
+        setExportStatus("已匯出，公式已設定自動重算，用 Excel／Google Sheet 打開即刻見到啱嘅數。", "ok");
+      });
+    }).catch(function(err){
+      var code = err && err.code;
+      if (code === "declined"){ setExportStatus("", ""); }
+      else if (code === "rate_limited"){ setExportStatus("啱啱先啱啱匯出緊，請等一陣再試。", "error"); }
+      else { setExportStatus("匯出失敗：" + (err && err.message ? err.message : "未知錯誤"), "error"); }
+    });
+  });
+
+  initDownloadsCapability();
+
+  renderPeoplePickers();
+  renderAll();
+})();
+</script>
