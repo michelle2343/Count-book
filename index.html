@@ -804,13 +804,33 @@
     }).catch(function(){ return wbout; });
   }
 
-  function initDownloadsCapability(){
-    if (!window.claude || typeof window.claude.use !== "function"){ return; }
-    window.claude.use("downloads").then(function(d){
-      downloadsCap = d;
-      if (d){ exportBtn.hidden = false; }
-    }).catch(function(){ /* stay hidden */ });
+  // This is a plain website (GitHub Pages), not a Claude Artifact, so there is no
+  // window.claude runtime — save the file the ordinary browser way: an object URL on a
+  // throwaway <a download> link. (If this page ever does run inside a Claude Artifact
+  // viewer, that sandbox blocks <a download> entirely, so prefer window.claude.use
+  // ("downloads") there instead — checked first, falling through automatically here.)
+  function saveFile(blob, filename){
+    if (window.claude && typeof window.claude.use === "function"){
+      return window.claude.use("downloads").then(function(d){
+        if (d) return d.save({ filename: filename, data: blob });
+        return saveViaAnchor(blob, filename);
+      }).catch(function(){ return saveViaAnchor(blob, filename); });
+    }
+    return saveViaAnchor(blob, filename);
   }
+
+  function saveViaAnchor(blob, filename){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    return Promise.resolve({ status: "saved" });
+  }
+
+  exportBtn.hidden = false;
 
   exportBtn.addEventListener("click", function(){
     if (typeof XLSX === "undefined"){
@@ -822,14 +842,10 @@
       return;
     }
     setExportStatus("匯出緊…", "");
-    var go = downloadsCap ? Promise.resolve(downloadsCap) : window.claude.use("downloads");
-    Promise.all([buildWorkbookBlob(), go]).then(function(results){
-      var blob = results[0], d = results[1];
-      if (!d){ setExportStatus("呢度睇緊嘅環境唔支援匯出檔案。", "error"); return; }
-      downloadsCap = d;
-      return d.save({ filename: "計數本.xlsx", data: blob }).then(function(){
-        setExportStatus("已匯出，公式已設定自動重算，用 Excel／Google Sheet 打開即刻見到啱嘅數。", "ok");
-      });
+    buildWorkbookBlob().then(function(blob){
+      return saveFile(blob, "計數本.xlsx");
+    }).then(function(){
+      setExportStatus("已匯出，公式已設定自動重算，用 Excel／Google Sheet 打開即刻見到啱嘅數。", "ok");
     }).catch(function(err){
       var code = err && err.code;
       if (code === "declined"){ setExportStatus("", ""); }
@@ -837,8 +853,6 @@
       else { setExportStatus("匯出失敗：" + (err && err.message ? err.message : "未知錯誤"), "error"); }
     });
   });
-
-  initDownloadsCapability();
 
   renderPeoplePickers();
   renderAll();
