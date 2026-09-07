@@ -104,6 +104,12 @@
     background:var(--paper); color:var(--ink); font-size:14.5px;
     font-family:inherit;
   }
+  #pasteBox{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px;
+    background:var(--paper); color:var(--ink); font-size:13px;
+    font-family:"IBM Plex Mono",monospace; line-height:1.5; resize:vertical;
+  }
+  #pasteBox:focus{ outline:2px solid var(--focus); outline-offset:1px; }
   .field input:focus, .seg input:focus + span{ outline:2px solid var(--focus); outline-offset:1px; }
   select{
     padding:9px 10px; border:1px solid var(--line); border-radius:9px;
@@ -235,6 +241,16 @@
   </header>
 
   <main>
+    <section class="panel">
+      <h2>貼上資料，自動入晒</h2>
+      <p class="hint">將成段記錄直接貼落嚟，格式跟返：「Pay by / Paid by 邊個」→「出席：邊啲人」→「項目 金額（$ 或 ¥）」，每段之間用一行 --- 分隔。撳「自動入資料」就會逐段幫你加做開支。</p>
+      <textarea id="pasteBox" rows="7" placeholder="例如：&#10;Pay by wing&#10;出席：wing Leo Yandy&#10;汶和記 $1553.54&#10;---&#10;Paid by Yandy&#10;出席：wing Yandy QQ&#10;Drink ¥220.24"></textarea>
+      <div class="actions-row">
+        <button type="button" class="btn" id="parsePasteBtn">自動入資料</button>
+        <span class="export-status" id="parseStatus" aria-live="polite"></span>
+      </div>
+    </section>
+
     <section class="panel">
       <h2>新增開支</h2>
       <p class="hint">邊個找數、邊個有份食／搭，寫低就得。</p>
@@ -402,6 +418,127 @@
       renderPeoplePickers();
     }
     input.value = "";
+  });
+
+  // ---------- paste-to-parse ----------
+  // Turns a freeform "Pay by X / 出席：... / Label $amount" block of text (the shape
+  // people actually type into WhatsApp/notes) into expense entries, without requiring
+  // the amount and currency to be split into separate form fields by hand.
+  function parsePastedText(text, existingPeople){
+    var peopleMap = {}; // lowercase -> canonical casing
+    existingPeople.forEach(function(p){ peopleMap[p.toLowerCase()] = p; });
+
+    function canonicalName(raw){
+      var key = raw.toLowerCase();
+      if (peopleMap[key]) return peopleMap[key];
+      peopleMap[key] = raw;
+      return raw;
+    }
+
+    function parseAttendees(raw){
+      return raw.split(/[,，、\s+]+/).map(function(s){ return s.trim(); }).filter(Boolean).map(canonicalName);
+    }
+
+    function evalAmountExpr(expr){
+      expr = expr.replace(/,/g, "");
+      var tokens = expr.match(/[+\-]?\s*[\d.]+/g) || [];
+      var total = 0;
+      tokens.forEach(function(tok){ total += parseFloat(tok.replace(/\s+/g, "")); });
+      return total;
+    }
+
+    // The label never contains digits in practice, so the amount (with its optional
+    // +/- chain, e.g. "587+297.98" or "51.24-12.26") is found by matching a numeric
+    // run anchored to the END of the line — this also keeps a label like "水貝taxi
+    // -口岸taxi" intact, since that hyphen sits between letters, not between digits.
+    function parseItemLine(line){
+      var hasCNY = line.indexOf("¥") !== -1;
+      var stripped = line.replace(/[¥$]/g, "");
+      var m = stripped.match(/([\d][\d,]*\.?\d*(?:\s*[+\-]\s*[\d][\d,]*\.?\d*)*)\s*$/);
+      if (!m) return null;
+      var expr = m[1].trim();
+      var label = stripped.slice(0, m.index).trim();
+      if (!label) return null;
+      var amount = Math.round((evalAmountExpr(expr) + Number.EPSILON) * 100) / 100;
+      if (!isFinite(amount) || amount <= 0) return null;
+      var note = /[+\-]/.test(expr) ? expr.replace(/\s+/g, "").replace(/-/g, " − ").replace(/\+/g, " + ") : "";
+      return { label: label, currency: hasCNY ? "CNY" : "HKD", amount: amount, note: note };
+    }
+
+    var lines = text.split(/\r?\n/);
+    var blocks = [];
+    var current = null;
+    function finalize(){ if (current){ blocks.push(current); current = null; } }
+
+    var payerRe = /^(?:pay|paid)\s*by[:：]?\s*(.+)$/i;
+    var attendRe = /^出席[:：]\s*(.+)$/;
+    var sepRe = /^[—\-–_]{2,}\s*$/;
+
+    lines.forEach(function(rawLine){
+      var line = rawLine.trim();
+      if (!line) return;
+      if (sepRe.test(line)){ finalize(); return; }
+      var pm = line.match(payerRe);
+      if (pm){ finalize(); current = { payerRaw: pm[1].trim(), attendeesRaw: null, itemLines: [] }; return; }
+      if (!current) return; // preamble text (e.g. rate instructions) before the first block
+      var am = line.match(attendRe);
+      if (am){ current.attendeesRaw = am[1].trim(); return; }
+      current.itemLines.push(line);
+    });
+    finalize();
+
+    var expenses = [], warnings = [];
+    blocks.forEach(function(b, idx){
+      if (!b.payerRaw || !b.attendeesRaw || b.itemLines.length === 0){
+        warnings.push("第 " + (idx + 1) + " 段睇唔明，略過咗" + (b.payerRaw ? "（" + b.payerRaw + "）" : ""));
+        return;
+      }
+      var payer = canonicalName(b.payerRaw);
+      var attendees = parseAttendees(b.attendeesRaw);
+      var parsed = parseItemLine(b.itemLines.join(" "));
+      if (!parsed){
+        warnings.push("第 " + (idx + 1) + " 段嘅項目睇唔明：" + b.itemLines.join(" "));
+        return;
+      }
+      expenses.push({ label: parsed.label, note: parsed.note, payer: payer, currency: parsed.currency, amount: parsed.amount, attendees: attendees });
+    });
+
+    var newPeople = [];
+    Object.keys(peopleMap).forEach(function(k){
+      var name = peopleMap[k];
+      if (existingPeople.indexOf(name) === -1) newPeople.push(name);
+    });
+
+    return { expenses: expenses, warnings: warnings, newPeople: newPeople };
+  }
+
+  document.getElementById("parsePasteBtn").addEventListener("click", function(){
+    var pasteBox = document.getElementById("pasteBox");
+    var text = pasteBox.value;
+    var parseStatus = document.getElementById("parseStatus");
+    if (!text.trim()){
+      parseStatus.textContent = "未貼低嘢喎。";
+      parseStatus.className = "export-status error";
+      return;
+    }
+    var result = parsePastedText(text, state.people);
+    if (result.expenses.length === 0){
+      parseStatus.textContent = "睇唔明呢段格式，一筆都入唔到。";
+      parseStatus.className = "export-status error";
+      return;
+    }
+    result.newPeople.forEach(function(p){ state.people.push(p); });
+    result.expenses.forEach(function(ex){ state.expenses.push(ex); });
+    saveState();
+    renderPeoplePickers();
+    renderAll();
+
+    var msg = "已入咗 " + result.expenses.length + " 筆開支";
+    if (result.newPeople.length) msg += "，新增 " + result.newPeople.length + " 個人名";
+    if (result.warnings.length) msg += "；略過咗 " + result.warnings.length + " 段（" + result.warnings.join("；") + "）";
+    parseStatus.textContent = msg;
+    parseStatus.className = "export-status" + (result.warnings.length ? " error" : " ok");
+    pasteBox.value = "";
   });
 
   // ---------- add expense form ----------
