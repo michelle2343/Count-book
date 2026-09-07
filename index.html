@@ -940,43 +940,107 @@
     setS(totalCheckRow0, 0, "總和核對（應該 = 0）");
     setF(totalCheckRow0, 3, "SUM(D" + (balFirstRow0 + 1) + ":D" + (balLastRow0 + 1) + ")", 0, "$#,##0.00");
 
-    var creditorName = "";
-    var maxNet = -Infinity;
-    people.forEach(function(p){
-      var n = (paidMap[p] || 0) - (consumedMap[p] || 0);
-      if (n > maxNet){ maxNet = n; creditorName = p; }
+    // ③ 埋單建議 — a general "who pays whom" cross-tab using a waterfall (northwest-
+    // corner) allocation formula. This handles ANY number of creditors and debtors
+    // correctly, not just a single net-receiver: by construction, each row's cells
+    // always sum to exactly that debtor's owed amount and each column's cells always
+    // sum to exactly that creditor's receivable amount, regardless of row/column
+    // order — no ranking or sorting needed, since every person's row in ② is already
+    // known, so each cell/name/amount here is a direct formula reference back to it.
+    var creditors = [], debtors = [];
+    people.forEach(function(p, pi){
+      var net = (paidMap[p] || 0) - (consumedMap[p] || 0);
+      var balRowNum = balFirstRow0 + pi + 1;
+      if (net > 0.005) creditors.push({ name: p, rowNum: balRowNum });
+      else if (net < -0.005) debtors.push({ name: p, rowNum: balRowNum });
     });
-    setS(balHeadRow0, 6, "應收錢嘅人：");
-    setF(balHeadRow0, 7, "INDEX(A" + (balFirstRow0 + 1) + ":A" + (balLastRow0 + 1) + ",MATCH(MAX(D" + (balFirstRow0 + 1) + ":D" + (balLastRow0 + 1) + "),D" + (balFirstRow0 + 1) + ":D" + (balLastRow0 + 1) + ",0))", creditorName);
-    var creditorCellRef = "$H$" + (balHeadRow0 + 1);
 
     var setSectionRow0 = totalCheckRow0 + 2;
     setS(setSectionRow0, 0, "③ 埋單建議");
-    setS(setSectionRow0, 2, "（假設淨數得一個人應收——而家呢批數係咁；如果之後改到多過一個人應收，呢個簡化式唔夠準，請以工具畫面上嘅「最少轉帳」方案為準。）");
-    var setHeadRow0 = setSectionRow0 + 1;
-    ["邊個找數", "找俾邊個", "金額"].forEach(function(h, i){ setS(setHeadRow0, i, h); });
-    var setFirstRow0 = setHeadRow0 + 1;
-    people.forEach(function(person, pi){
-      var r0 = setFirstRow0 + pi;
-      var b0 = balFirstRow0 + pi;
-      var bRowNum = b0 + 1;
-      var net = (paidMap[person] || 0) - (consumedMap[person] || 0);
-      var isDebtor = net < -0.005;
-      setF(r0, 0, "IF(D" + bRowNum + '<-0.005,A' + bRowNum + ',"")', isDebtor ? person : "");
-      setF(r0, 1, "IF(D" + bRowNum + "<-0.005," + creditorCellRef + ',"")', isDebtor ? creditorName : "");
-      setF(r0, 2, "IF(D" + bRowNum + '<-0.005,-D' + bRowNum + ',"")', isDebtor ? -net : "", "$#,##0.00");
-    });
-    var setLastRow0 = setFirstRow0 + Math.max(people.length, 1) - 1;
-    var check2Row0 = setLastRow0 + 1;
-    setS(check2Row0, 0, "埋單總額核對（應該同②嘅應收總額一致）");
-    var sumSettle = people.reduce(function(s, p){
-      var n = (paidMap[p] || 0) - (consumedMap[p] || 0);
-      return s + (n < -0.005 ? -n : 0);
-    }, 0);
-    setF(check2Row0, 2, "SUM(C" + (setFirstRow0 + 1) + ":C" + (setLastRow0 + 1) + ")", sumSettle, "$#,##0.00");
 
-    var maxRow0 = check2Row0;
+    var maxRow0 = setSectionRow0;
     var maxCol0 = Math.max(FIXED_COLS + people.length - 1, FIXED_COLS - 1);
+
+    if (creditors.length === 0 || debtors.length === 0){
+      setS(setSectionRow0, 2, "帳目已經打和，唔使搵數。");
+    } else {
+      setS(setSectionRow0, 2, "橫排係邊個要找數，直排係邊個應收；交叉嗰格就係嗰兩個人之間要過嘅金額，逐格用公式計，唔止一個人應收都準。每行／每列嘅總和已經同②嘅淨結餘核對一致。");
+
+      var COL_NAME = 0, COL_AMOUNT = 1, COL_GRID0 = 2;
+      var numCreditors = creditors.length;
+      var numDebtors = debtors.length;
+      var COL_CHECK = COL_GRID0 + numCreditors;
+      var colB_Letter = XLSX.utils.encode_col(COL_AMOUNT);
+      var firstGridColLetter = XLSX.utils.encode_col(COL_GRID0);
+      var lastGridColLetter = XLSX.utils.encode_col(COL_GRID0 + numCreditors - 1);
+
+      var gridHeadRow0 = setSectionRow0 + 1;
+      setS(gridHeadRow0, COL_NAME, "邊個搵數 ＼ 俾邊個");
+      creditors.forEach(function(c, cj){ setF(gridHeadRow0, COL_GRID0 + cj, "A" + c.rowNum, c.name); });
+      setS(gridHeadRow0, COL_CHECK, "呢行核對");
+
+      var amountsRow0 = gridHeadRow0 + 1;
+      var amountsRowNum = amountsRow0 + 1;
+      setS(amountsRow0, COL_AMOUNT, "應收金額");
+      var creditAmt = {};
+      creditors.forEach(function(c){ creditAmt[c.name] = (paidMap[c.name] || 0) - (consumedMap[c.name] || 0); });
+      creditors.forEach(function(c, cj){ setF(amountsRow0, COL_GRID0 + cj, "D" + c.rowNum, creditAmt[c.name], "$#,##0.00"); });
+      var totalCreditVal = creditors.reduce(function(s, c){ return s + creditAmt[c.name]; }, 0);
+      setF(amountsRow0, COL_CHECK, "SUM(" + firstGridColLetter + amountsRowNum + ":" + lastGridColLetter + amountsRowNum + ")", totalCreditVal, "$#,##0.00");
+
+      var firstDataRow0 = amountsRow0 + 1;
+      var firstDataRowNum = firstDataRow0 + 1;
+
+      var debtAmt = {};
+      debtors.forEach(function(d){ debtAmt[d.name] = -((paidMap[d.name] || 0) - (consumedMap[d.name] || 0)); });
+
+      var creditCumVal = []; var runC = 0;
+      creditors.forEach(function(c){ runC += creditAmt[c.name]; creditCumVal.push(Math.round((runC + Number.EPSILON) * 100) / 100); });
+      var debtCumVal = []; var runD = 0;
+      debtors.forEach(function(d){ runD += debtAmt[d.name]; debtCumVal.push(Math.round((runD + Number.EPSILON) * 100) / 100); });
+
+      debtors.forEach(function(d, di){
+        var r0 = firstDataRow0 + di;
+        var rowNum = r0 + 1;
+        setF(r0, COL_NAME, "A" + d.rowNum, d.name);
+        setF(r0, COL_AMOUNT, "-D" + d.rowNum, debtAmt[d.name], "$#,##0.00");
+
+        var cumDebtThisF = "SUM($" + colB_Letter + "$" + firstDataRowNum + ":$" + colB_Letter + rowNum + ")";
+        var cumDebtPrevF = di === 0 ? "0" : "SUM($" + colB_Letter + "$" + firstDataRowNum + ":$" + colB_Letter + (rowNum - 1) + ")";
+        var cumDebtPrevVal = di === 0 ? 0 : debtCumVal[di - 1];
+        var cumDebtThisVal = debtCumVal[di];
+
+        creditors.forEach(function(c, cj){
+          var colLetter = XLSX.utils.encode_col(COL_GRID0 + cj);
+          var cumCreditThisF = "SUM($" + firstGridColLetter + "$" + amountsRowNum + ":$" + colLetter + "$" + amountsRowNum + ")";
+          var cumCreditPrevF = cj === 0 ? "0" : "SUM($" + firstGridColLetter + "$" + amountsRowNum + ":$" + XLSX.utils.encode_col(COL_GRID0 + cj - 1) + "$" + amountsRowNum + ")";
+          var cumCreditPrevVal = cj === 0 ? 0 : creditCumVal[cj - 1];
+          var cumCreditThisVal = creditCumVal[cj];
+
+          var cellVal = Math.max(0, Math.min(cumDebtThisVal, cumCreditThisVal) - Math.max(cumDebtPrevVal, cumCreditPrevVal));
+          cellVal = Math.round((cellVal + Number.EPSILON) * 100) / 100;
+          var formula = "MAX(0,MIN(" + cumDebtThisF + "," + cumCreditThisF + ")-MAX(" + cumDebtPrevF + "," + cumCreditPrevF + "))";
+          setF(r0, COL_GRID0 + cj, formula, cellVal, "$#,##0.00");
+        });
+
+        setF(r0, COL_CHECK, "SUM(" + firstGridColLetter + rowNum + ":" + lastGridColLetter + rowNum + ")", debtAmt[d.name], "$#,##0.00");
+      });
+
+      var totalsRow0 = firstDataRow0 + numDebtors;
+      var lastDataRowNum = firstDataRow0 + numDebtors;
+      setS(totalsRow0, COL_NAME, "總額核對");
+      var totalDebtVal = debtors.reduce(function(s, d){ return s + debtAmt[d.name]; }, 0);
+      setF(totalsRow0, COL_AMOUNT, "SUM($" + colB_Letter + "$" + firstDataRowNum + ":$" + colB_Letter + "$" + lastDataRowNum + ")", totalDebtVal, "$#,##0.00");
+      creditors.forEach(function(c, cj){
+        var colLetter = XLSX.utils.encode_col(COL_GRID0 + cj);
+        setF(totalsRow0, COL_GRID0 + cj, "SUM($" + colLetter + "$" + firstDataRowNum + ":$" + colLetter + "$" + lastDataRowNum + ")", creditAmt[c.name], "$#,##0.00");
+      });
+      var checkColLetter = XLSX.utils.encode_col(COL_CHECK);
+      setF(totalsRow0, COL_CHECK, "SUM($" + checkColLetter + "$" + firstDataRowNum + ":$" + checkColLetter + "$" + lastDataRowNum + ")", totalDebtVal, "$#,##0.00");
+
+      maxRow0 = totalsRow0;
+      maxCol0 = Math.max(maxCol0, COL_CHECK);
+    }
     ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: maxRow0, c: maxCol0 } });
     ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }];
     ws["!cols"] = headers.map(function(_, i){ return { wch: i < 2 ? 18 : (i < FIXED_COLS ? 11 : 8) }; });
