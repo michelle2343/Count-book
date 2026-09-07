@@ -451,9 +451,11 @@
     // +/- chain, e.g. "587+297.98" or "51.24-12.26") is found by matching a numeric
     // run anchored to the END of the line — this also keeps a label like "水貝taxi
     // -口岸taxi" intact, since that hyphen sits between letters, not between digits.
+    var CNY_WORD_RE = /¥|cny|rmb|人民幣|人仔/i;
+    var CURRENCY_WORD_RE = /[¥$]|cny|rmb|hkd|人民幣|人仔|港幣|港元/gi;
     function parseItemLine(line){
-      var hasCNY = line.indexOf("¥") !== -1;
-      var stripped = line.replace(/[¥$]/g, "");
+      var hasCNY = CNY_WORD_RE.test(line);
+      var stripped = line.replace(CURRENCY_WORD_RE, "");
       var m = stripped.match(/([\d][\d,]*\.?\d*(?:\s*[+\-]\s*[\d][\d,]*\.?\d*)*)\s*$/);
       if (!m) return null;
       var expr = m[1].trim();
@@ -465,24 +467,38 @@
       return { label: label, currency: hasCNY ? "CNY" : "HKD", amount: amount, note: note };
     }
 
+    // Recognise a handful of common ways people phrase "who paid" / "who was there",
+    // not just the exact "Pay by" / "出席：" shape. The Chinese keyword variants
+    // require a colon so a line that merely happens to start with e.g. "找數" text
+    // isn't mistaken for a new block and doesn't swallow the wrong lines after it.
+    function matchPayer(line){
+      var m = line.match(/^(?:pay|paid)\s*by[:：]?\s*(.+)$/i);
+      if (m) return m[1].trim();
+      m = line.match(/^(?:俾錢|畀錢|付款|找數(?:人)?)[:：]\s*(.+)$/);
+      if (m) return m[1].trim();
+      return null;
+    }
+    function matchAttendees(line){
+      var m = line.match(/^(?:出席|在場|attendees?|present)[:：]\s*(.+)$/i);
+      return m ? m[1].trim() : null;
+    }
+
     var lines = text.split(/\r?\n/);
     var blocks = [];
     var current = null;
     function finalize(){ if (current){ blocks.push(current); current = null; } }
 
-    var payerRe = /^(?:pay|paid)\s*by[:：]?\s*(.+)$/i;
-    var attendRe = /^出席[:：]\s*(.+)$/;
     var sepRe = /^[—\-–_]{2,}\s*$/;
 
     lines.forEach(function(rawLine){
       var line = rawLine.trim();
       if (!line) return;
       if (sepRe.test(line)){ finalize(); return; }
-      var pm = line.match(payerRe);
-      if (pm){ finalize(); current = { payerRaw: pm[1].trim(), attendeesRaw: null, itemLines: [] }; return; }
+      var payerName = matchPayer(line);
+      if (payerName){ finalize(); current = { payerRaw: payerName, attendeesRaw: null, itemLines: [] }; return; }
       if (!current) return; // preamble text (e.g. rate instructions) before the first block
-      var am = line.match(attendRe);
-      if (am){ current.attendeesRaw = am[1].trim(); return; }
+      var attendeesText = matchAttendees(line);
+      if (attendeesText){ current.attendeesRaw = attendeesText; return; }
       current.itemLines.push(line);
     });
     finalize();
