@@ -9,9 +9,9 @@
 | 工具 | 路徑 | 說明 |
 | --- | --- | --- |
 | 計數本 | [`index.html`](index.html) | 多人聚會分帳 |
-| 顯影台 IG Post Studio | [`ig-post-studio/`](ig-post-studio/index.html) | Instagram 貼文設計工具 |
+| IG Post Generator | [`ig-post-studio/`](ig-post-studio/index.html) | Instagram 貼文設計工具 |
 
-## 顯影台 IG Post Studio
+## IG Post Generator
 
 喺瀏覽器整有設計感嘅 IG 貼文圖，做完直接匯出 PNG。同樣係純前端單一 HTML 檔，唔會上傳任何嘢去伺服器。
 
@@ -24,6 +24,6 @@
 - **文字**：18 款字型（中英分組，含繁體手寫霞鶩文楷同多款 playful 手寫體）、直排、描邊、光暈（可選色）、底色標記
 - **編輯**：拖曳定位＋吸附輔助線、方向鍵微調、圖層鎖定、多選對齊／均分
 - **多頁**：最多 10 頁輪播；手機版用 IG 式圓點導覽，掃到最尾再向左拉即新增一頁
-- **匯出**：單頁或全部頁匯出 PNG
+- **輸出**：撳 Output 會直接開圖，手機長按即可存入相簿；亦可儲存做 PNG 檔
 
 字型由 Google Fonts 載入，第一次開需要網絡。
