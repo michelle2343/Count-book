@@ -334,7 +334,8 @@
     </section>
 
     <div class="actions-row">
-      <button class="btn ghost small" id="clearAllBtn">清空全部，開新一輪</button>
+      <button class="btn ghost small" id="clearExpensesBtn">清空開支，開新一輪（人名保留）</button>
+      <button class="btn ghost small" id="clearAllBtn">清空晒（連人名都清）</button>
       <button class="btn ghost small" id="exportXlsxBtn" hidden>⇩ 匯出做 Excel／Google Sheet（.xlsx）</button>
       <span class="export-status" id="exportStatus" aria-live="polite"></span>
     </div>
@@ -628,6 +629,13 @@
     e.target.reset();
     document.querySelector('input[name="currency"][value="HKD"]').checked = true;
     renderPeoplePickers();
+    renderAll();
+  });
+
+  document.getElementById("clearExpensesBtn").addEventListener("click", function(){
+    state.expenses = [];
+    state.settledPairs = [];
+    saveState();
     renderAll();
   });
 
