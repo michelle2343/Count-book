@@ -393,6 +393,80 @@
   hr.rule{ border:none; border-top:1px solid var(--line); margin:14px 0; }
   .sect{ display:flex; flex-direction:column; }
 
+  /* 全頁統一設定 */
+  .global-box{
+    border:1px solid rgba(232,163,61,.32); background:rgba(232,163,61,.06);
+    border-radius:8px; padding:11px; margin-bottom:14px;
+    display:flex; flex-direction:column; gap:9px;
+  }
+  .global-box .field{ margin-bottom:0; }
+  .global-head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+    font-size:11.5px; font-weight:700; color:var(--accent-strong);
+  }
+  .global-head .mono{ font-size:9px; letter-spacing:.12em; color:var(--text-faint); font-weight:400; }
+  .switch-row{
+    display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text);
+    background:var(--ink); border:1px solid var(--line); border-radius:6px;
+    padding:7px 9px; cursor:pointer;
+  }
+  .switch-row input{ accent-color:var(--accent); }
+  .switch-row span{ flex:1; }
+  .save-flag{ font-size:9.5px; letter-spacing:.06em; color:var(--text-faint); white-space:nowrap; }
+
+  /* 使用說明 */
+  .guide-modal{
+    position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center;
+    background:rgba(6,5,4,.86); padding:16px;
+  }
+  .guide-sheet{
+    display:flex; flex-direction:column; width:min(600px,100%); max-height:min(90vh,840px);
+    background:var(--ink-raised); border:1px solid var(--line); border-radius:12px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+  }
+  .guide-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 14px; border-bottom:1px solid var(--line);
+    font-size:13px; font-weight:700; color:var(--accent-strong);
+  }
+  .guide-body{ flex:1; overflow-y:auto; padding:16px; background:var(--ink-sunken); }
+  .guide-slide{ display:flex; flex-direction:column; gap:12px; }
+  .guide-slide[hidden]{ display:none; }
+  .guide-slide h3{ margin:0; font-size:15px; color:var(--text); }
+  .guide-slide p{ margin:0; font-size:12.5px; line-height:1.75; color:var(--text-muted); }
+  .guide-slide strong{ color:var(--text); font-weight:600; }
+  .guide-shots{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .guide-shots canvas{ width:100%; height:auto; display:block; border-radius:5px; border:1px solid var(--line); }
+  .guide-steps{ margin:0; padding-left:17px; display:flex; flex-direction:column; gap:8px;
+    font-size:12.5px; line-height:1.7; color:var(--text-muted); }
+  .guide-steps b{ color:var(--text); font-weight:600; }
+  .guide-map{ display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:7px; }
+  .guide-col{
+    border:1px solid var(--line); border-radius:6px; background:var(--ink-raised-2);
+    padding:9px; display:flex; flex-direction:column; gap:5px;
+  }
+  .guide-col b{ font-size:10.5px; color:var(--accent-strong); letter-spacing:.03em; }
+  .guide-col span{ font-size:11px; color:var(--text-muted); line-height:1.6; }
+  .guide-col.is-mid{ background:var(--ink); align-items:center; text-align:center; justify-content:center; }
+  .guide-list{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .guide-list li{ font-size:12px; line-height:1.65; color:var(--text-muted); }
+  .guide-list b{ color:var(--text); font-weight:600; }
+  .guide-foot{
+    display:flex; align-items:center; gap:10px; padding:11px 14px;
+    border-top:1px solid var(--line); flex-wrap:wrap;
+  }
+  .guide-dots{ display:flex; gap:6px; align-items:center; }
+  .guide-dots i{ width:6px; height:6px; border-radius:50%; background:var(--line); display:block; }
+  .guide-dots i.is-on{ background:var(--accent); }
+  .guide-nav{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+  @media (max-width:560px){
+    .guide-map{ grid-template-columns:1fr; }
+    .guide-shots{ grid-template-columns:repeat(3,1fr); }
+    .guide-foot{ flex-direction:column; align-items:stretch; }
+    .guide-nav{ margin-left:0; }
+    .guide-nav .btn{ flex:1; }
+  }
+
   /* 輸出彈窗 */
   .output-modal{
     position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center;
@@ -504,6 +578,12 @@
           <option value="1080x608">橫式 1.91:1 · 1080×608</option>
         </select>
       </label>
+      <button type="button" class="btn btn-ghost btn-icon" id="guideBtn" title="使用說明">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .9-1 1.6v.4"/><path d="M12 17h.01"/></svg>
+      </button>
+      <button type="button" class="btn btn-ghost btn-icon" id="newDocBtn" title="開新設計（清除目前內容）">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>
+      </button>
       <button type="button" class="btn btn-ghost" id="shuffleBtn" title="隨機換一組版面＋配色">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
         隨機
@@ -513,6 +593,7 @@
         Output
       </button>
       <button type="button" class="btn" id="exportAllBtn" hidden>Output All</button>
+      <span class="save-flag mono" id="saveFlag"></span>
     </div>
   </header>
 
@@ -723,6 +804,32 @@
       <div class="rail-body">
 
         <section class="sect" id="pnlContent">
+          <div class="global-box">
+            <div class="global-head"><span>全頁統一</span><span class="mono">ALL PAGES</span></div>
+            <label class="switch-row" for="gSync">
+              <input type="checkbox" id="gSync" checked>
+              <span>所有頁面用同一組設定</span>
+            </label>
+            <div class="field">
+              <div class="field-label"><span>標籤</span></div>
+              <input type="text" id="cTag">
+            </div>
+            <div class="field">
+              <div class="field-label"><span>配色</span></div>
+              <select id="gPal"></select>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <div class="field-label"><span>標題字體</span></div>
+                <select id="gTitleFont"></select>
+              </div>
+              <div class="field">
+                <div class="field-label"><span>副標字體</span></div>
+                <select id="gSubFont"></select>
+              </div>
+            </div>
+            <p class="micro">呢四項一次設定、全部頁面跟住變，唔使逐頁重複入。如果想某幾頁唔同，熄咗上面個掣，之後嘅改動就只會影響當前頁。</p>
+          </div>
           <div class="field">
             <div class="field-label"><span>標題</span></div>
             <textarea id="cTitle" rows="2"></textarea>
@@ -731,17 +838,11 @@
             <div class="field-label"><span>副標</span></div>
             <textarea id="cSubtitle" rows="3"></textarea>
           </div>
-          <div class="field-grid">
-            <div class="field">
-              <div class="field-label"><span>標籤</span></div>
-              <input type="text" id="cTag">
-            </div>
-            <div class="field">
-              <div class="field-label"><span>編號</span></div>
-              <input type="text" id="cNum">
-            </div>
+          <div class="field">
+            <div class="field-label"><span>編號</span></div>
+            <input type="text" id="cNum">
           </div>
-          <p class="micro">每一頁都有自己的內容；換版面時文字會自動搬到新位置。</p>
+          <p class="micro">標題、副標、編號係逐頁獨立；換版面時文字會自動搬到新位置。</p>
         </section>
 
         <section class="sect" id="pnlLayers" hidden>
@@ -979,6 +1080,81 @@
           <strong>電腦：</strong>右鍵另存圖片，或者撳右邊儲存檔案。
         </p>
         <button type="button" class="btn btn-accent" id="outputSaveBtn">儲存檔案</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-modal" id="guideModal" hidden>
+    <div class="guide-sheet">
+      <div class="guide-head">
+        <span id="guideTitle">使用說明</span>
+        <button type="button" class="icon-sq" id="guideClose" title="關閉">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="guide-body" id="guideBody">
+
+        <section class="guide-slide">
+          <h3>做得出咩？</h3>
+          <div class="guide-shots" id="guideShots"></div>
+          <p>IG 貼文圖：<strong>1080×1350（直式 4:5）</strong>，另有正方形、橫式、限動尺寸。一次最多做 <strong>10 頁</strong>，就係 IG carousel 嗰種可以左右掃嘅貼文。</p>
+          <p><strong>45 款版面 × 9 組配色</strong>，加埋自選顏色、手寫字體同裝飾，每頁都可以唔同樣。完成撳 <strong>Output</strong>，出 PNG，手機長按就入相簿。</p>
+        </section>
+
+        <section class="guide-slide" hidden>
+          <h3>版面分佈</h3>
+          <div class="guide-map">
+            <div class="guide-col">
+              <b>左邊・設計</b>
+              <span>版面：45 款，每 9 個一頁</span>
+              <span>配色：9 組 ＋ 自選顏色</span>
+              <span>背景：上傳相 / AI 漸層</span>
+              <span>插圖：相片（可退地）、裝飾線</span>
+            </div>
+            <div class="guide-col is-mid">
+              <b>中間・預覽</b>
+              <span>即時畫布，可拖字、縮放<br>下面啲圓點＝頁數<br>最後一頁向左掃＝加頁</span>
+            </div>
+            <div class="guide-col">
+              <b>右邊・內容</b>
+              <span>內容：全頁統一設定 ＋ 標題副標</span>
+              <span>片格：所有元素清單、鎖定</span>
+              <span>樣式：選中嗰件嘅所有調整</span>
+            </div>
+          </div>
+          <p><strong>手機版</strong>：三欄變成上面嘅分頁掣，畫布喺中間，撳分頁名就切換到嗰組工具。</p>
+        </section>
+
+        <section class="guide-slide" hidden>
+          <h3>點樣用（5 步）</h3>
+          <ol class="guide-steps">
+            <li><b>入內容</b> — 右邊「內容」打標題、副標。最頂「全頁統一」入一次標籤、配色、字體，全部頁都會跟。</li>
+            <li><b>揀版面</b> — 左邊「版面」揀一款，左右掃睇 5 組風格（基本／幾何／內容型／Fancy／手寫風）。</li>
+            <li><b>加背景</b> — 「背景」上傳相，再拉縮放同位置；或者用 AI 生成漸層背景。</li>
+            <li><b>加嘢同微調</b> — 「插圖」加相或裝飾線；喺畫布直接拖、揀中咗就去右邊「樣式」改色、字級、光暈。</li>
+            <li><b>加頁同出圖</b> — 畫布下面撳「＋」或喺最後一頁向左掃加新頁；最後撳右上角 <b>Output</b>。</li>
+          </ol>
+        </section>
+
+        <section class="guide-slide" hidden>
+          <h3>有咩功能要記住</h3>
+          <ul class="guide-list">
+            <li><b>自動儲存</b>：每次改嘢都會自動存喺你部機（唔會上載），唔小心閂咗 browser 或者撳走咗，下次開返同一條連結會自動接返落去。想由零開始，撳右上角「新設計」。</li>
+            <li><b>鎖定片格</b>：「片格」分頁撳鎖頭，鎖咗就唔會喺畫布誤郁。</li>
+            <li><b>多選對齊</b>：畫布上撳住 Shift／長按加選，右邊會出對齊同均分。</li>
+            <li><b>退地</b>：插圖選中後喺「樣式」開「退地」，自動去走淺色背景。</li>
+            <li><b>Output 存相簿</b>：撳 Output 會彈出張圖，iPhone／Android <b>長按張圖 →「加入照片」</b> 就入相簿；電腦右鍵另存。</li>
+            <li><b>預覽縮放</b>：畫布上面有 ＋／－、「符合視窗」同 100%。</li>
+          </ul>
+        </section>
+
+      </div>
+      <div class="guide-foot">
+        <div class="guide-dots" id="guideDots"></div>
+        <div class="guide-nav">
+          <button type="button" class="btn btn-sm btn-ghost" id="guidePrev">上一步</button>
+          <button type="button" class="btn btn-sm btn-accent" id="guideNext">下一步</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1521,13 +1697,17 @@
   }
 
   function newPage(n){
+    var g = state.globals;
+    var content = defaultContent(n);
+    if (g.tag) content.tag = g.tag;
     var pg = {
-      id:'p' + (pageUid++), tpl:'stack', pal:'night',
-      content:defaultContent(n),
+      id:'p' + (pageUid++), tpl:'stack', pal:g.pal || 'night',
+      content:content,
       bg:{ kind:'gradient', image:null, imageToken:0, overlay:28, scrim:'up', art:null, imgScale:1, imgX:.5, imgY:.5 },
       layers:[], sel:[], activeId:null
     };
     pg.layers = tplById(pg.tpl).build(pg.content);
+    applyGlobalFonts(pg);
     return pg;
   }
 
@@ -1541,7 +1721,11 @@
     };
   }
 
-  var state = { width:1080, height:1350, pages:[], current:0 };
+  var state = {
+    width:1080, height:1350, pages:[], current:0,
+    /* 全頁統一設定：標籤／配色／標題字體／副標字體 */
+    globals:{ sync:true, pal:'night', tag:defaultContent(1).tag, titleFont:'', subFont:'' }
+  };
 
   var els = {};
   var ctx = null;
@@ -2120,6 +2304,7 @@
     drawGuides(ctx, W, H);
     updatePosReadout();
     schedulePageThumb();
+    scheduleSave();
   }
 
   /* 縮圖 */
@@ -2155,6 +2340,11 @@
   function renderAllPageThumbs(){
     pageThumbs.forEach(function(t, i){ if (state.pages[i]) renderPageThumb(t.cv, state.pages[i]); });
   }
+  var allThumbTimer = null;
+  function scheduleAllPageThumbs(){
+    clearTimeout(allThumbTimer);
+    allThumbTimer = setTimeout(renderAllPageThumbs, 320);
+  }
 
   /* ================= 版面 / 配色 ================= */
 
@@ -2163,6 +2353,7 @@
     pg.tpl = id;
     var free = pg.layers.filter(function(l){ return l.role === 'free'; });
     pg.layers = tplById(id).build(pg.content).concat(free);
+    applyGlobalFonts(pg);
     pg.sel = []; pg.activeId = null;
     syncTemplateUI();
     renderLayerList(); renderInspector(); render();
@@ -2170,16 +2361,97 @@
   }
 
   function applyPalette(id){
-    page().pal = id;
+    state.globals.pal = id;
+    var targets = state.globals.sync ? state.pages : [ page() ];
+    targets.forEach(function(pg){ pg.pal = id; });
     syncPaletteUI();
     render(); renderTplThumbs(); renderInspector();
+    if (targets.length > 1) scheduleAllPageThumbs();
   }
 
   function updateContent(role, value){
-    var pg = page();
-    pg.content[role] = value;
-    pg.layers.forEach(function(l){ if (l.type === 'text' && l.role === role) l.text = value; });
+    var global = (role === 'tag' && state.globals.sync);
+    if (role === 'tag') state.globals.tag = value;
+    var targets = global ? state.pages : [ page() ];
+    targets.forEach(function(pg){
+      pg.content[role] = value;
+      pg.layers.forEach(function(l){ if (l.type === 'text' && l.role === role) l.text = value; });
+    });
     renderLayerList(); render(); scheduleTplThumbs(); ensureFonts();
+    if (targets.length > 1) scheduleAllPageThumbs();
+  }
+
+  /* ---------- 全頁統一：標題／副標字體 ---------- */
+
+  function globalFontKey(role){ return role === 'title' ? 'titleFont' : 'subFont'; }
+
+  /* 版面本身為某個角色指定的字體（用嚟還原「跟版面預設」） */
+  function tplDefaultFont(pg, role){
+    var built;
+    try { built = tplById(pg.tpl).build(pg.content); } catch (e){ return null; }
+    for (var i = 0; i < built.length; i++){
+      if (built[i].type === 'text' && built[i].role === role) return built[i].font;
+    }
+    return null;
+  }
+
+  function applyGlobalFonts(pg){
+    [ 'title', 'subtitle' ].forEach(function(role){
+      var f = state.globals[globalFontKey(role)];
+      if (!f) return;
+      pg.layers.forEach(function(l){
+        if (l.type === 'text' && l.role === role) l.font = f;
+      });
+    });
+  }
+
+  function setRoleFont(role, font){
+    state.globals[globalFontKey(role)] = font || '';
+    var targets = state.globals.sync ? state.pages : [ page() ];
+    targets.forEach(function(pg){
+      var use = font || tplDefaultFont(pg, role);
+      if (!use) return;
+      pg.layers.forEach(function(l){
+        if (l.type === 'text' && l.role === role) l.font = use;
+      });
+    });
+    render(); renderInspector(); scheduleTplThumbs(); scheduleAllPageThumbs(); ensureFonts();
+  }
+
+  function buildGlobalPalSelect(){
+    els.gPal.innerHTML = '';
+    PALETTES.concat([ customPal ]).forEach(function(p){
+      var o = document.createElement('option');
+      o.value = p.id; o.textContent = p.name;
+      els.gPal.appendChild(o);
+    });
+  }
+
+  function buildGlobalFontSelects(){
+    [ els.gTitleFont, els.gSubFont ].forEach(function(sel){
+      sel.innerHTML = '';
+      var base = document.createElement('option');
+      base.value = ''; base.textContent = '跟版面預設';
+      sel.appendChild(base);
+      FONT_GROUPS.forEach(function(g){
+        var og = document.createElement('optgroup');
+        og.label = g.label;
+        g.items.forEach(function(it){
+          var o = document.createElement('option');
+          o.value = it.v; o.textContent = it.n;
+          og.appendChild(o);
+        });
+        sel.appendChild(og);
+      });
+    });
+  }
+
+  function syncGlobalUI(){
+    if (!els.gSync) return;
+    els.gSync.checked = !!state.globals.sync;
+    els.gPal.value = page().pal;
+    els.gTitleFont.value = state.globals.titleFont || '';
+    els.gSubFont.value = state.globals.subFont || '';
   }
 
   /* ================= 頁面 ================= */
@@ -2188,7 +2460,7 @@
     if (i < 0 || i >= state.pages.length) return;
     state.current = i;
     syncPageUI();
-    syncTemplateUI(); syncPaletteUI(); syncContentInputs(); syncPhotoUI();
+    syncTemplateUI(); syncPaletteUI(); syncContentInputs(); syncPhotoUI(); syncGlobalUI();
     renderLayerList(); renderInspector(); render();
     renderTplThumbs(); ensureFonts();
   }
@@ -2668,6 +2940,7 @@
     });
   }
   function syncPaletteUI(){
+    if (els.gPal) els.gPal.value = page().pal;
     Array.prototype.forEach.call(els.palGrid.children, function(b){
       b.classList.toggle('is-active', b.dataset.id === page().pal);
       if (b.dataset.id === 'custom'){
@@ -3313,6 +3586,309 @@
     });
   }
 
+  /* ================= 自動儲存（存喺你部機，唔會上載） ================= */
+
+  var SAVE_KEY   = 'igpg-autosave-v1';
+  var GUIDE_KEY  = 'igpg-guide-v1';
+  var DB_NAME    = 'igpg', DB_STORE = 'doc', DB_ROW = 'autosave';
+
+  var saveArmed = false, savePending = false, saveTimer = null, dbPromise = null;
+
+  function openDB(){
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise(function(res, rej){
+      if (!window.indexedDB){ rej(new Error('no-indexeddb')); return; }
+      var rq;
+      try { rq = indexedDB.open(DB_NAME, 1); } catch (e){ rej(e); return; }
+      rq.onupgradeneeded = function(){
+        try { rq.result.createObjectStore(DB_STORE); } catch (e){}
+      };
+      rq.onsuccess = function(){ res(rq.result); };
+      rq.onerror   = function(){ rej(rq.error || new Error('indexeddb')); };
+      rq.onblocked = function(){ rej(new Error('blocked')); };
+    });
+    return dbPromise;
+  }
+
+  function dbPut(val){
+    return openDB().then(function(db){
+      return new Promise(function(res, rej){
+        var tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).put(val, DB_ROW);
+        tx.oncomplete = function(){ res(true); };
+        tx.onerror    = function(){ rej(tx.error); };
+        tx.onabort    = function(){ rej(tx.error); };
+      });
+    });
+  }
+  function dbGet(){
+    return openDB().then(function(db){
+      return new Promise(function(res, rej){
+        var tx = db.transaction(DB_STORE, 'readonly');
+        var rq = tx.objectStore(DB_STORE).get(DB_ROW);
+        rq.onsuccess = function(){ res(rq.result || null); };
+        rq.onerror   = function(){ rej(rq.error); };
+      });
+    });
+  }
+  function dbDel(){
+    return openDB().then(function(db){
+      return new Promise(function(res){
+        var tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).delete(DB_ROW);
+        tx.oncomplete = function(){ res(true); };
+        tx.onerror    = function(){ res(false); };
+      });
+    }).catch(function(){ return false; });
+  }
+
+  function lsPut(val){
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(val)); return true; } catch (e){ return false; }
+  }
+  function lsGet(){
+    try { var raw = localStorage.getItem(SAVE_KEY); return raw ? JSON.parse(raw) : null; } catch (e){ return null; }
+  }
+  function lsDel(){ try { localStorage.removeItem(SAVE_KEY); } catch (e){} }
+
+  function serialize(){
+    return {
+      v:1, ts:Date.now(),
+      width:state.width, height:state.height, current:state.current,
+      globals:{
+        sync:!!state.globals.sync, pal:state.globals.pal, tag:state.globals.tag,
+        titleFont:state.globals.titleFont, subFont:state.globals.subFont
+      },
+      custom:Object.assign({}, customPal),
+      pages:state.pages.map(function(pg){
+        return {
+          tpl:pg.tpl, pal:pg.pal,
+          content:Object.assign({}, pg.content),
+          bg:{
+            kind:pg.bg.kind,
+            src:(pg.bg.image && pg.bg.image.src) || null,
+            overlay:pg.bg.overlay, scrim:pg.bg.scrim,
+            art:pg.bg.art ? Object.assign({}, pg.bg.art) : null,
+            imgScale:pg.bg.imgScale, imgX:pg.bg.imgX, imgY:pg.bg.imgY
+          },
+          layers:pg.layers.map(function(l){
+            var o = {};
+            Object.keys(l).forEach(function(k){
+              if (k === 'img' || k === 'view') return;
+              o[k] = l[k];
+            });
+            if (l.cut) o.cut = Object.assign({}, l.cut);
+            if (l.type === 'image') o.src = (l.img && l.img.src) || l.src || null;
+            return o;
+          })
+        };
+      })
+    };
+  }
+
+  function stampSaved(ts){
+    if (!els.saveFlag) return;
+    var d = new Date(ts || Date.now());
+    els.saveFlag.textContent = '已自動儲存 ' +
+      ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+  }
+
+  function doSave(){
+    savePending = false;
+    var snap;
+    try { snap = serialize(); } catch (e){ return; }
+    if (els.saveFlag) els.saveFlag.textContent = '儲存中…';
+    dbPut(snap).then(function(){ stampSaved(snap.ts); })
+      .catch(function(){
+        if (lsPut(snap)) stampSaved(snap.ts);
+        else if (els.saveFlag) els.saveFlag.textContent = '未能自動儲存';
+      });
+  }
+
+  function scheduleSave(){
+    if (!saveArmed) return;
+    savePending = true;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(doSave, 1200);
+  }
+
+  function flushSave(){
+    if (!saveArmed) return;
+    clearTimeout(saveTimer);
+    doSave();
+  }
+
+  function restoreDoc(d){
+    if (!d || !d.pages || !d.pages.length) return false;
+
+    var W = parseInt(d.width, 10) || 1080, H = parseInt(d.height, 10) || 1350;
+    state.width = W; state.height = H;
+    els.canvas.width = W; els.canvas.height = H;
+    els.dimReadout.textContent = W + ' × ' + H;
+    var sizeKey = W + 'x' + H;
+    Array.prototype.forEach.call(els.canvasSize.options, function(o){
+      if (o.value === sizeKey) els.canvasSize.value = sizeKey;
+    });
+
+    if (d.custom) Object.assign(customPal, d.custom);
+    if (d.globals) Object.assign(state.globals, d.globals);
+    bgCaches = {};
+
+    var pending = 0, built = false;
+    function settle(){
+      if (!built || pending > 0) return;
+      render(); renderTplThumbs(); renderAllPageThumbs(); syncPhotoUI();
+    }
+
+    state.pages = d.pages.slice(0, MAX_PAGES).map(function(p, i){
+      var sb = p.bg || {};
+      var pg = {
+        id:'p' + (pageUid++),
+        tpl:p.tpl || 'stack',
+        pal:p.pal || 'night',
+        content:Object.assign(defaultContent(i + 1), p.content || {}),
+        bg:{
+          kind:(sb.kind === 'image' && sb.src) ? 'image' : (sb.kind === 'art' ? 'art' : (sb.kind || 'gradient')),
+          image:null, imageToken:0,
+          overlay:(typeof sb.overlay === 'number') ? sb.overlay : 28,
+          scrim:sb.scrim || 'up',
+          art:sb.art || null,
+          imgScale:(typeof sb.imgScale === 'number') ? sb.imgScale : 1,
+          imgX:(typeof sb.imgX === 'number') ? sb.imgX : .5,
+          imgY:(typeof sb.imgY === 'number') ? sb.imgY : .5
+        },
+        layers:[], sel:[], activeId:null
+      };
+
+      if (sb.src){
+        pending++;
+        (function(target, src){
+          var im = new Image();
+          im.onload  = function(){ target.bg.image = im; target.bg.imageToken++; pending--; settle(); };
+          im.onerror = function(){ target.bg.kind = 'gradient'; pending--; settle(); };
+          im.src = src;
+        })(pg, sb.src);
+      }
+
+      pg.layers = (p.layers || []).filter(function(sl){
+        return sl && sl.type && (sl.type !== 'image' || sl.src);
+      }).map(function(sl){
+        var l = Object.assign({}, sl);
+        l.id = nid();
+        l.img = null; l.view = null;
+        if (l.type === 'image'){
+          l.cut = Object.assign({ on:false, tol:34, feather:1 }, l.cut || {});
+          pending++;
+          (function(layer){
+            var im = new Image();
+            im.onload = function(){
+              layer.img = im;
+              layer.natW = im.naturalWidth || im.width || 1;
+              layer.natH = im.naturalHeight || im.height || 1;
+              if (layer.cut.on){ try { refreshCutout(layer); } catch (e){ layer.cut.on = false; } }
+              pending--; settle();
+            };
+            im.onerror = function(){ layer.cut.on = false; pending--; settle(); };
+            im.src = layer.src;
+          })(l);
+        }
+        return l;
+      });
+
+      if (!pg.layers.length) pg.layers = tplById(pg.tpl).build(pg.content);
+      return pg;
+    });
+
+    state.current = Math.min(Math.max(0, parseInt(d.current, 10) || 0), state.pages.length - 1);
+    buildPageStrip();
+    gotoPage(state.current);
+    renderAllPageThumbs();
+    applyZoom();
+    built = true; settle();
+    return true;
+  }
+
+  function newDoc(){
+    var msg = '開新設計？目前嘅 ' + state.pages.length + ' 頁會清走，無法復原。';
+    if (!window.confirm(msg)) return;
+    bgCaches = {};
+    state.pages = [ newPage(1) ];
+    state.current = 0;
+    buildPageStrip();
+    gotoPage(0);
+    renderAllPageThumbs();
+    flushSave();
+    showToast('已開新設計。');
+  }
+
+  function bootStorage(){
+    var load;
+    try { load = dbGet(); } catch (e){ load = Promise.reject(e); }
+    load.catch(function(){ return lsGet(); })
+      .then(function(d){
+        if (!d) return;
+        try {
+          if (restoreDoc(d)){
+            showToast('已載入你上次未完成嘅設計（' + state.pages.length + ' 頁）。想由零開始撳右上角「新設計」。');
+          }
+        } catch (e){}
+      })
+      .catch(function(){})
+      .then(function(){
+        saveArmed = true;
+        if (els.saveFlag && !els.saveFlag.textContent) els.saveFlag.textContent = '自動儲存：開';
+        maybeShowGuide();
+      });
+  }
+
+  /* ================= 使用說明 ================= */
+
+  var guideIdx = 0, guideSlides = [];
+
+  function maybeShowGuide(){
+    var seen = null;
+    try { seen = localStorage.getItem(GUIDE_KEY); } catch (e){}
+    if (!seen) openGuide();
+  }
+
+  function openGuide(){
+    guideSlides = Array.prototype.slice.call(els.guideBody.querySelectorAll('.guide-slide'));
+    els.guideModal.hidden = false;
+    renderGuideShots();
+    setGuide(0);
+  }
+
+  function closeGuide(){
+    els.guideModal.hidden = true;
+    try { localStorage.setItem(GUIDE_KEY, '1'); } catch (e){}
+  }
+
+  function setGuide(i){
+    if (!guideSlides.length) return;
+    guideIdx = Math.max(0, Math.min(guideSlides.length - 1, i));
+    guideSlides.forEach(function(sl, k){ sl.hidden = k !== guideIdx; });
+    els.guideDots.innerHTML = '';
+    guideSlides.forEach(function(_, k){
+      var dot = document.createElement('i');
+      if (k === guideIdx) dot.className = 'is-on';
+      els.guideDots.appendChild(dot);
+    });
+    els.guidePrev.disabled = guideIdx === 0;
+    els.guideNext.textContent = (guideIdx === guideSlides.length - 1) ? '開始設計' : '下一步';
+    els.guideTitle.textContent = '使用說明 ' + (guideIdx + 1) + '／' + guideSlides.length;
+    els.guideBody.scrollTop = 0;
+  }
+
+  function renderGuideShots(){
+    if (!els.guideShots || els.guideShots.dataset.ready) return;
+    [ 0, 20, 40 ].forEach(function(i){
+      var tpl = TEMPLATES[i] || TEMPLATES[0];
+      var cv = document.createElement('canvas');
+      els.guideShots.appendChild(cv);
+      try { renderTplThumb(cv, tpl); } catch (e){}
+    });
+    els.guideShots.dataset.ready = '1';
+  }
+
   function init(){
     [ 'canvas','canvasSize','shuffleBtn','exportBtn','exportAllBtn','tplPages','tplDots','tplPrev','tplNext',
       'palGrid','cpA','cpB','cpInk','cpAccent','cpBand','cpOnBand','cpApply',
@@ -3335,7 +3911,9 @@
       'canvasScroll','canvasFrame','zoomOutBtn','zoomInBtn','zoomVal','zoomFitBtn','zoom100Btn',
       'previewToggle','swipeHint','pageDots','pageDotsBar','dupPageBtnM','delPageBtnM',
       'multiBar','multiCount','clearSelBtn','alignRow','layerKind','fieldColor',
-      'outputModal','outputSheet','outputTitle','outputClose','outputBody','outputSaveBtn'
+      'outputModal','outputSheet','outputTitle','outputClose','outputBody','outputSaveBtn',
+      'gSync','gPal','gTitleFont','gSubFont','guideBtn','newDocBtn','saveFlag',
+      'guideModal','guideBody','guideTitle','guideClose','guidePrev','guideNext','guideDots','guideShots'
     ].forEach(function(id){ els[id] = document.getElementById(id); });
 
     ctx = els.canvas.getContext('2d');
@@ -3345,6 +3923,8 @@
     state.pages = [ newPage(1) ];
 
     buildFontSelect();
+    buildGlobalPalSelect();
+    buildGlobalFontSelects();
     buildShapeGrid();
     buildTemplateGrid();
     buildPaletteGrid();
@@ -3354,6 +3934,7 @@
     syncContentInputs();
     syncPhotoUI();
     syncTemplateUI();
+    syncGlobalUI();
     bindEvents();
 
     renderLayerList(); renderInspector(); render();
@@ -3375,6 +3956,8 @@
       document.fonts.ready.then(function(){ render(); renderTplThumbs(); renderAllPageThumbs(); });
     }
     if (sampleFn) els.aiSection.hidden = false;
+
+    bootStorage();
   }
 
   function buildAiChips(){
@@ -3618,6 +4201,47 @@
       if (!lt.classList.contains('is-collapsed')) requestAnimationFrame(applyZoom);
     });
 
+    /* 全頁統一設定 */
+    els.gSync.addEventListener('change', function(){
+      state.globals.sync = els.gSync.checked;
+      if (state.globals.sync){
+        applyPalette(page().pal);
+        updateContent('tag', page().content.tag);
+        showToast('已開同步：標籤、配色、字體會套用到全部頁面。');
+      } else {
+        showToast('已關同步：之後嘅改動只影響當前頁。');
+      }
+      scheduleSave();
+    });
+    els.gPal.addEventListener('change', function(){ applyPalette(els.gPal.value); });
+    els.gTitleFont.addEventListener('change', function(){ setRoleFont('title', els.gTitleFont.value); });
+    els.gSubFont.addEventListener('change', function(){ setRoleFont('subtitle', els.gSubFont.value); });
+
+    /* 使用說明 */
+    els.guideBtn.addEventListener('click', openGuide);
+    els.guideClose.addEventListener('click', closeGuide);
+    els.guidePrev.addEventListener('click', function(){ setGuide(guideIdx - 1); });
+    els.guideNext.addEventListener('click', function(){
+      if (guideIdx >= guideSlides.length - 1) closeGuide();
+      else setGuide(guideIdx + 1);
+    });
+    els.guideModal.addEventListener('click', function(e){
+      if (e.target === els.guideModal) closeGuide();
+    });
+
+    /* 新設計 ＋ 離開前保存 */
+    els.newDocBtn.addEventListener('click', newDoc);
+    window.addEventListener('pagehide', function(){ if (savePending) doSave(); });
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'hidden' && savePending) doSave();
+    });
+    window.addEventListener('beforeunload', function(e){
+      if (!savePending) return;
+      doSave();
+      e.preventDefault();
+      e.returnValue = '';
+    });
+
     /* 輸出彈窗 */
     els.outputClose.addEventListener('click', closeOutput);
     els.outputSaveBtn.addEventListener('click', saveOutputs);
@@ -3625,7 +4249,9 @@
       if (e.target === els.outputModal) closeOutput();
     });
     window.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && !els.outputModal.hidden) closeOutput();
+      if (e.key !== 'Escape') return;
+      if (!els.outputModal.hidden) closeOutput();
+      else if (!els.guideModal.hidden) closeGuide();
     });
 
     /* 縮放 */
