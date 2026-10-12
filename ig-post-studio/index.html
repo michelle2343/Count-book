@@ -97,6 +97,7 @@
     padding:0; max-height:calc(100vh - 118px); display:flex; flex-direction:column; overflow:hidden;
   }
   .rail-body{ padding:14px; overflow-y:auto; flex:1; }
+  .rail-toggle{ display:none; }
 
   /* tabs */
   .tabs{
@@ -176,7 +177,10 @@
   .tpl.is-active .tpl-name{ color:var(--accent-strong); }
 
   /* palettes */
-  .pal-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+  .pal-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .pal-grid.is-sm{ gap:6px; }
+  .pal-grid.is-sm .pal{ aspect-ratio:1.25; border-radius:5px; }
+  .pal-grid.is-sm .pal-dot{ width:8px; height:8px; right:4px; bottom:4px; }
   .pal{ position:relative; aspect-ratio:1.15; border-radius:4px; border:1px solid var(--line); cursor:pointer; padding:0; }
   .pal:hover{ transform:translateY(-1px); }
   .pal-dot{ position:absolute; right:5px; bottom:5px; width:10px; height:10px; border-radius:50%; border:1.5px solid rgba(0,0,0,.25); }
@@ -522,6 +526,8 @@
       border-radius:8px;
     }
     .canvas-scroll{ flex:none; height:32vh; max-height:32vh; }
+    /* 兩邊工具都摺埋時，畫布自動放大 */
+    body.rails-folded .canvas-scroll{ height:56vh; max-height:56vh; }
     .canvas-frame{ padding:9px; }
     .pagestrip{ display:none; }
     .pagedots{ display:flex; }
@@ -540,6 +546,17 @@
     .pagestrip{ padding:6px; }
     .rail{ max-height:none; }
     .rail-body{ max-height:none; }
+    .rail-toggle{
+      display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%;
+      padding:10px 12px; background:var(--ink-raised-2); border:none;
+      border-bottom:1px solid var(--line); color:var(--accent-strong);
+      font-size:12.5px; font-weight:700; text-align:left; cursor:pointer;
+    }
+    .rail-toggle svg{ width:15px; height:15px; flex:none; transition:transform .18s ease; }
+    .rail.is-folded .rail-toggle{ border-bottom:none; }
+    .rail.is-folded .rail-toggle svg{ transform:rotate(-90deg); }
+    .rail.is-folded .tabs,
+    .rail.is-folded .rail-body{ display:none; }
     .tab{ font-size:11.5px; padding:8px 4px; }
     .topbar{ padding:9px 12px; }
     .brand-mark{ font-size:20px; }
@@ -601,6 +618,10 @@
 
     <!-- 左：版面 / 配色 / 背景 -->
     <aside class="rail">
+      <button type="button" class="rail-toggle" aria-expanded="true">
+        <span>設計工具：版面・配色・背景・插圖</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
       <div class="tabs" role="tablist">
         <button type="button" class="tab is-active" data-panel="pnlLayout">版面</button>
         <button type="button" class="tab" data-panel="pnlColor">配色</button>
@@ -796,6 +817,10 @@
 
     <!-- 右：內容 / 片格 / 樣式 -->
     <aside class="rail">
+      <button type="button" class="rail-toggle" aria-expanded="true">
+        <span>編輯：內容・片格・樣式</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
       <div class="tabs" role="tablist">
         <button type="button" class="tab is-active" data-panel="pnlContent">內容</button>
         <button type="button" class="tab" data-panel="pnlLayers">片格</button>
@@ -815,8 +840,8 @@
               <input type="text" id="cTag">
             </div>
             <div class="field">
-              <div class="field-label"><span>配色</span></div>
-              <select id="gPal"></select>
+              <div class="field-label"><span>配色</span><span class="mono range-val" id="gPalName">夜霓</span></div>
+              <div class="pal-grid is-sm" id="gPalGrid"></div>
             </div>
             <div class="field-grid">
               <div class="field">
@@ -1098,7 +1123,7 @@
           <h3>做得出咩？</h3>
           <div class="guide-shots" id="guideShots"></div>
           <p>IG 貼文圖：<strong>1080×1350（直式 4:5）</strong>，另有正方形、橫式、限動尺寸。一次最多做 <strong>10 頁</strong>，就係 IG carousel 嗰種可以左右掃嘅貼文。</p>
-          <p><strong>45 款版面 × 9 組配色</strong>，加埋自選顏色、手寫字體同裝飾，每頁都可以唔同樣。完成撳 <strong>Output</strong>，出 PNG，手機長按就入相簿。</p>
+          <p><strong>45 款版面 × 11 組配色</strong>，加埋自選顏色、手寫字體同裝飾，每頁都可以唔同樣。完成撳 <strong>Output</strong>，出 PNG，手機長按就入相簿。</p>
         </section>
 
         <section class="guide-slide" hidden>
@@ -1107,7 +1132,7 @@
             <div class="guide-col">
               <b>左邊・設計</b>
               <span>版面：45 款，每 9 個一頁</span>
-              <span>配色：9 組 ＋ 自選顏色</span>
+              <span>配色：11 組 ＋ 自選顏色</span>
               <span>背景：上傳相 / AI 漸層</span>
               <span>插圖：相片（可退地）、裝飾線</span>
             </div>
@@ -1117,12 +1142,12 @@
             </div>
             <div class="guide-col">
               <b>右邊・內容</b>
-              <span>內容：全頁統一設定 ＋ 標題副標</span>
+              <span>內容：全頁統一（標籤／配色／字體）</span>
               <span>片格：所有元素清單、鎖定</span>
               <span>樣式：選中嗰件嘅所有調整</span>
             </div>
           </div>
-          <p><strong>手機版</strong>：三欄變成上面嘅分頁掣，畫布喺中間，撳分頁名就切換到嗰組工具。</p>
+          <p><strong>手機版</strong>：畫布喺最上，下面「設計工具」同「編輯」兩條橫掣可以逐個摺埋（預設打開）。兩個都摺埋時畫布會自動放大，方便睇效果。</p>
         </section>
 
         <section class="guide-slide" hidden>
@@ -1178,7 +1203,9 @@
     { id:'cream',   name:'奶油', a:'#f7f1e5', b:'#e6d9c2', ink:'#2a2620', accent:'#0f766e', band:'#0f766e', onBand:'#ecfdf9' },
     { id:'sunset',  name:'日落', a:'#ff9a44', b:'#ff2e63', ink:'#ffffff', accent:'#2b0a3d', band:'#2b0a3d', onBand:'#ffd9e8' },
     { id:'mist',    name:'霧藍', a:'#cfd9df', b:'#8fa9c0', ink:'#16232e', accent:'#16232e', band:'#16232e', onBand:'#eef4f8' },
-    { id:'caramel', name:'焦糖', a:'#3a2416', b:'#8c5a2b', ink:'#fdf3e7', accent:'#f2b880', band:'#1f1309', onBand:'#fdf3e7' }
+    { id:'caramel', name:'焦糖', a:'#3a2416', b:'#8c5a2b', ink:'#fdf3e7', accent:'#f2b880', band:'#1f1309', onBand:'#fdf3e7' },
+    { id:'sky',     name:'晴空', a:'#e9f4ff', b:'#9ec9f0', ink:'#102a40', accent:'#ff7a59', band:'#102a40', onBand:'#eaf4ff' },
+    { id:'berry',   name:'莓紅', a:'#2a0a14', b:'#8e1c3c', ink:'#fff0f4', accent:'#ffb3c1', band:'#140309', onBand:'#fff0f4' }
   ];
 
   var customPal = { id:'custom', name:'自選', a:'#2b1055', b:'#7597de', ink:'#ffffff', accent:'#ffd166', band:'#120a26', onBand:'#ffffff' };
@@ -2418,12 +2445,22 @@
     render(); renderInspector(); scheduleTplThumbs(); scheduleAllPageThumbs(); ensureFonts();
   }
 
-  function buildGlobalPalSelect(){
-    els.gPal.innerHTML = '';
+  function buildGlobalPalGrid(){
+    els.gPalGrid.innerHTML = '';
     PALETTES.concat([ customPal ]).forEach(function(p){
-      var o = document.createElement('option');
-      o.value = p.id; o.textContent = p.name;
-      els.gPal.appendChild(o);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pal';
+      btn.dataset.id = p.id;
+      btn.title = p.name;
+      btn.setAttribute('aria-label', p.name);
+      btn.style.background = 'linear-gradient(135deg,' + p.a + ',' + p.b + ')';
+      var dot = document.createElement('span');
+      dot.className = 'pal-dot';
+      dot.style.background = p.accent;
+      btn.appendChild(dot);
+      btn.addEventListener('click', function(){ applyPalette(p.id); });
+      els.gPalGrid.appendChild(btn);
     });
   }
 
@@ -2449,7 +2486,6 @@
   function syncGlobalUI(){
     if (!els.gSync) return;
     els.gSync.checked = !!state.globals.sync;
-    els.gPal.value = page().pal;
     els.gTitleFont.value = state.globals.titleFont || '';
     els.gSubFont.value = state.globals.subFont || '';
   }
@@ -2940,14 +2976,18 @@
     });
   }
   function syncPaletteUI(){
-    if (els.gPal) els.gPal.value = page().pal;
-    Array.prototype.forEach.call(els.palGrid.children, function(b){
-      b.classList.toggle('is-active', b.dataset.id === page().pal);
-      if (b.dataset.id === 'custom'){
-        b.style.background = 'linear-gradient(135deg,' + customPal.a + ',' + customPal.b + ')';
-        b.firstChild.style.background = customPal.accent;
-      }
+    var cur = page().pal;
+    [ els.palGrid, els.gPalGrid ].forEach(function(grid){
+      if (!grid) return;
+      Array.prototype.forEach.call(grid.children, function(b){
+        b.classList.toggle('is-active', b.dataset.id === cur);
+        if (b.dataset.id === 'custom'){
+          b.style.background = 'linear-gradient(135deg,' + customPal.a + ',' + customPal.b + ')';
+          b.firstChild.style.background = customPal.accent;
+        }
+      });
     });
+    if (els.gPalName) els.gPalName.textContent = palById(cur).name;
   }
 
   var ANCHORS = ['tl','tc','tr','ml','mc','mr','bl','bc','br'];
@@ -3912,7 +3952,7 @@
       'previewToggle','swipeHint','pageDots','pageDotsBar','dupPageBtnM','delPageBtnM',
       'multiBar','multiCount','clearSelBtn','alignRow','layerKind','fieldColor',
       'outputModal','outputSheet','outputTitle','outputClose','outputBody','outputSaveBtn',
-      'gSync','gPal','gTitleFont','gSubFont','guideBtn','newDocBtn','saveFlag',
+      'gSync','gPalGrid','gPalName','gTitleFont','gSubFont','guideBtn','newDocBtn','saveFlag',
       'guideModal','guideBody','guideTitle','guideClose','guidePrev','guideNext','guideDots','guideShots'
     ].forEach(function(id){ els[id] = document.getElementById(id); });
 
@@ -3923,7 +3963,7 @@
     state.pages = [ newPage(1) ];
 
     buildFontSelect();
-    buildGlobalPalSelect();
+    buildGlobalPalGrid();
     buildGlobalFontSelects();
     buildShapeGrid();
     buildTemplateGrid();
@@ -3972,6 +4012,19 @@
   function bindEvents(){
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(tab){
       tab.addEventListener('click', function(){ switchTab(tab); });
+    });
+
+    /* 手機版：左右兩邊工具列都可以摺埋（預設打開） */
+    Array.prototype.forEach.call(document.querySelectorAll('.rail-toggle'), function(btn){
+      btn.addEventListener('click', function(){
+        var rail = btn.parentNode;
+        var folded = rail.classList.toggle('is-folded');
+        btn.setAttribute('aria-expanded', folded ? 'false' : 'true');
+        var rails = document.querySelectorAll('.rail').length;
+        var hidden = document.querySelectorAll('.rail.is-folded').length;
+        document.body.classList.toggle('rails-folded', rails > 0 && hidden === rails);
+        if (zoom.mode === 'fit') setTimeout(applyZoom, 80);
+      });
     });
 
     els.canvasSize.addEventListener('change', function(){
@@ -4213,7 +4266,6 @@
       }
       scheduleSave();
     });
-    els.gPal.addEventListener('change', function(){ applyPalette(els.gPal.value); });
     els.gTitleFont.addEventListener('change', function(){ setRoleFont('title', els.gTitleFont.value); });
     els.gSubFont.addEventListener('change', function(){ setRoleFont('subtitle', els.gSubFont.value); });
 
