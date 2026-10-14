@@ -12,7 +12,12 @@
   [hidden]{ display:none !important; }
 </style>
 <title>IG Post Generator</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Amatic+SC:wght@400;700&family=Anton&family=Bebas+Neue&family=Big+Shoulders+Display:wght@700;900&family=Caveat:wght@400;700&family=Chocolate+Classical+Sans&family=IBM+Plex+Mono:wght@400;500;600&family=LXGW+WenKai+TC:wght@300;400;700&family=Lora:wght@400;600&family=Noto+Sans+HK:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@500;700;900&family=Patrick+Hand&family=Permanent+Marker&family=Playfair+Display:wght@600;800&family=Sacramento&family=Work+Sans:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- 核心字型：介面、預設版面同所有英文字型（細，加埋都係幾十 KB）。
+     四款大粒嘅中文字型（思源黑 HK／思源宋／霞鶩文楷／巧克力黑體）改為用到先載，
+     第一次開頁可以慳大約 1.5–2 MB。 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;700;900&display=swap">
 <style>
   :root{
     --ink:#121110;
@@ -1265,6 +1270,60 @@
     ]}
   ];
 
+  /* ---- 按需載入嘅中文字型（檔案大，唔用就唔載） ---- */
+  var LAZY_FAMILIES = {
+    /* 中文（檔案大） */
+    'Noto Sans HK':'Noto+Sans+HK:wght@400;500;700',
+    'Noto Serif TC':'Noto+Serif+TC:wght@500;700;900',
+    'LXGW WenKai TC':'LXGW+WenKai+TC:wght@300;400;700',
+    'Chocolate Classical Sans':'Chocolate+Classical+Sans',
+    /* 英文（細，但唔用就唔使載） */
+    'Abril Fatface':'Abril+Fatface',
+    'Amatic SC':'Amatic+SC:wght@400;700',
+    'Anton':'Anton',
+    'Bebas Neue':'Bebas+Neue',
+    'Caveat':'Caveat:wght@400;700',
+    'Lora':'Lora:wght@400;600',
+    'Patrick Hand':'Patrick+Hand',
+    'Permanent Marker':'Permanent+Marker',
+    'Playfair Display':'Playfair+Display:wght@600;800',
+    'Sacramento':'Sacramento',
+    'Work Sans':'Work+Sans:wght@400;600'
+  };
+  var familyRequested = {};
+
+  /* 由 font stack 入面抽出需要補載嘅字型，注入 <link> */
+  function ensureFamilies(stack){
+    if (!stack) return false;
+    var added = false;
+    Object.keys(LAZY_FAMILIES).forEach(function(name){
+      if (familyRequested[name]) return;
+      if (stack.indexOf(name) < 0) return;
+      familyRequested[name] = 1;
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=' + LAZY_FAMILIES[name] + '&display=swap';
+      link.addEventListener('load', function(){
+        fontLoaded = {};              // 重新量度文字闊度
+        ensureFonts();
+        render(); scheduleTplThumbs(); schedulePageThumb();
+      });
+      document.head.appendChild(link);
+      added = true;
+    });
+    return added;
+  }
+
+  /* 版面縮圖都要見到正確字型：只載當前嗰頁 9 個版面用到嘅 */
+  function ensureTemplatePageFonts(pageIndex){
+    var per = 9;
+    TEMPLATES.slice(pageIndex * per, (pageIndex + 1) * per).forEach(function(t){
+      var built;
+      try { built = t.build(page().content); } catch (e){ return; }
+      built.forEach(function(l){ if (l.type === 'text') ensureFamilies(l.font); });
+    });
+  }
+
   var FONT_NOTES = {};
   FONT_GROUPS.forEach(function(g){ g.items.forEach(function(it){ if (!FONT_NOTES[it.v]) FONT_NOTES[it.v] = it.note; }); });
 
@@ -1774,6 +1833,7 @@
       state.pages.forEach(function(pg){
         pg.layers.forEach(function(l){
           if (l.type !== 'text' || !l.text) return;
+          ensureFamilies(l.font);
           var spec = (l.weight || 400) + ' 40px ' + l.font;
           var key = spec + '|' + l.text;
           if (fontLoaded[key]) return;
@@ -2944,8 +3004,29 @@
     var w = els.tplPages.clientWidth;
     els.tplPages.scrollTo({ left: i * w, behavior:'smooth' });
   }
+  /* 版面縮圖嘅中文字型：真係睇到個版面清單先至載，
+     手機版唔碌落去就慳返成 0.5MB */
+  function watchTemplateFonts(){
+    var fired = false;
+    var load = function(){
+      if (fired) return;
+      fired = true;
+      setTimeout(function(){ ensureTemplatePageFonts(currentTplPage()); }, 300);
+    };
+    if (!window.IntersectionObserver){ setTimeout(load, 2500); return; }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ load(); io.disconnect(); }
+      });
+    }, { threshold:.2 });
+    io.observe(els.tplPages);
+  }
+
+  var tplFontTimer = null;
   function syncTplDots(){
     var cur = currentTplPage();
+    clearTimeout(tplFontTimer);
+    tplFontTimer = setTimeout(function(){ ensureTemplatePageFonts(cur); }, 200);
     Array.prototype.forEach.call(els.tplDots.children, function(d, i){
       d.classList.toggle('is-active', i === cur);
     });
@@ -3980,6 +4061,7 @@
     renderLayerList(); renderInspector(); render();
     renderAllPageThumbs();
     ensureFonts();
+    watchTemplateFonts();
     applyZoom();
     requestAnimationFrame(function(){ requestAnimationFrame(applyZoom); });
     window.addEventListener('resize', function(){
