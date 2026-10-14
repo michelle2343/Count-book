@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="IG Post Generator — 喺瀏覽器製作有設計感的 Instagram 貼文圖片：45 款版面、自選配色、照片退地、手寫裝飾，最多 10 頁輪播，輸出後可長按存相簿。">
+<meta name="description" content="IG Post Generator — 在瀏覽器製作有設計感的 Instagram 貼文圖片：45 款版面、自選配色、照片退地、手寫裝飾，最多 10 頁輪播，輸出後可長按存進相簿。">
 <meta name="theme-color" content="#121110">
 <style>
   html{ color-scheme:dark; }
@@ -641,7 +641,7 @@
             </button>
           </div>
           <div class="tpl-pages" id="tplPages"></div>
-          <p class="micro">共 45 款版面，每 9 個一頁，可左右滑動：基本 → 幾何 → 內容型 → Fancy → <strong>手寫風</strong>。縮圖是實時預覽，會跟住你的文字同配色變。</p>
+          <p class="micro">共 45 款版面，每 9 個一頁，可左右滑動：基本 → 幾何 → 內容型 → Fancy → <strong>手寫風</strong>。縮圖是即時預覽，會跟著你的文字和配色變。</p>
         </section>
 
         <section class="sect" id="pnlColor" hidden>
@@ -750,13 +750,13 @@
             </button>
             <input type="file" id="imgFileInput" accept="image/*" hidden>
           </div>
-          <p class="micro">插入後可直接喺畫布拖動、縮放、旋轉。選中插圖時，右邊「樣式」分頁有<strong>退地</strong>（去背景）、圓形遮罩同陰影。</p>
+          <p class="micro">插入後可直接在畫布上拖動、縮放、旋轉。選中插圖時，右邊「樣式」分頁有<strong>退地</strong>（去背景）、圓形遮罩和陰影。</p>
 
           <hr class="rule">
 
           <h2 class="tool-title">裝飾線・圖示<span class="tool-title-en">DECOR</span></h2>
           <div class="shape-grid" id="shapeGrid"></div>
-          <p class="micro">全部手繪風格，顏色跟住配色的強調色，插入後可改色、改粗幼同旋轉。</p>
+          <p class="micro">全部手繪風格，顏色跟著配色的強調色，插入後可改顏色、粗細和旋轉。</p>
         </section>
 
       </div>
@@ -792,7 +792,7 @@
         <span id="dimReadout">1080 × 1350</span>
         <span id="posReadout">未選取片格</span>
       </div>
-      <p class="hint">拖曳文字可移到任何位置，方向鍵微調；鎖上的片格唔會被誤郁。</p>
+      <p class="hint">拖曳文字可移到任何位置，方向鍵微調；鎖上的片格不會被誤移。</p>
 
       <div class="pagestrip">
         <div class="pagestrip-scroll" id="pageStrip"></div>
@@ -853,7 +853,7 @@
                 <select id="gSubFont"></select>
               </div>
             </div>
-            <p class="micro">呢四項一次設定、全部頁面跟住變，唔使逐頁重複入。如果想某幾頁唔同，熄咗上面個掣，之後嘅改動就只會影響當前頁。</p>
+            <p class="micro">這四項設定一次，所有頁面跟著變，不用逐頁重複輸入。想某幾頁不同，關掉上面的開關，之後的改動就只影響當前頁。</p>
           </div>
           <div class="field">
             <div class="field-label"><span>標題</span></div>
@@ -867,7 +867,7 @@
             <div class="field-label"><span>編號</span></div>
             <input type="text" id="cNum">
           </div>
-          <p class="micro">標題、副標、編號係逐頁獨立；換版面時文字會自動搬到新位置。</p>
+          <p class="micro">標題、副標、編號是逐頁獨立的；換版面時文字會自動移到新位置。</p>
         </section>
 
         <section class="sect" id="pnlLayers" hidden>
@@ -876,13 +876,13 @@
             新增文字片格
           </button>
           <ol class="filmstrip" id="layerList"></ol>
-          <p class="micro">撳鎖頭可以鎖定片格，鎖定後喺畫布上唔會被拖到或選到。</p>
+          <p class="micro">按鎖頭可以鎖定片格，鎖定後在畫布上不會被拖動或選取。</p>
         </section>
 
         <section class="sect" id="pnlStyle" hidden>
           <div class="inspector-empty" id="inspectorEmpty">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="6.5"/><path d="m20 20-4.6-4.6"/></svg>
-            <p>喺畫布或「片格」清單選一個項目<br>就可以喺呢度調整</p>
+            <p>在畫布或「片格」清單選一個項目<br>就可以在這裡調整</p>
           </div>
 
           <div id="inspectorForm" hidden>
@@ -902,7 +902,7 @@
                 <button type="button" class="icon-sq" data-align="disth" title="水平均分（3 個以上）"><svg viewBox="0 0 24 24"><path d="M3 3v18M21 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="10" y="7" width="4" height="10" rx="1" fill="currentColor"/></svg></button>
                 <button type="button" class="icon-sq" data-align="distv" title="垂直均分（3 個以上）"><svg viewBox="0 0 24 24"><path d="M3 3h18M3 21h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="7" y="10" width="10" height="4" rx="1" fill="currentColor"/></svg></button>
               </div>
-              <p class="micro">改樣式會套用到所有選取的片格；拖曳其中一個會一齊移動。</p>
+              <p class="micro">改樣式會套用到所有選取的片格；拖曳其中一個會一起移動。</p>
             </div>
 
             <div class="notice" id="lockNotice" hidden>
@@ -998,7 +998,7 @@
                     <div class="field-label"><span>邊緣柔化</span><span class="mono range-val" id="propCutFeatherVal">1</span></div>
                     <input type="range" id="propCutFeather" min="0" max="3" value="1">
                   </div>
-                  <p class="micro">由四邊向內消除相近顏色，最適合單色或淺色背景的插圖、商品相。容差太大會咬到主體。</p>
+                  <p class="micro">由四邊向內消除相近顏色，最適合單色或淺色背景的插圖、商品相片。容差太大會削到主體。</p>
                 </div>
                 <hr class="rule">
               </section>
@@ -1101,8 +1101,8 @@
       <div class="output-body" id="outputBody"></div>
       <div class="output-foot">
         <p class="output-hint">
-          <strong>iPhone／Android：</strong>長按上面張圖 →「加入照片」／「下載圖片」就會存入相簿。<br>
-          <strong>電腦：</strong>右鍵另存圖片，或者撳右邊儲存檔案。
+          <strong>iPhone／Android：</strong>長按上面的圖片 →「加入照片」／「下載圖片」就會存進相簿。<br>
+          <strong>電腦：</strong>右鍵另存圖片，或按右邊的「儲存檔案」。
         </p>
         <button type="button" class="btn btn-accent" id="outputSaveBtn">儲存檔案</button>
       </div>
@@ -1120,10 +1120,10 @@
       <div class="guide-body" id="guideBody">
 
         <section class="guide-slide">
-          <h3>做得出咩？</h3>
+          <h3>做得出什麼？</h3>
           <div class="guide-shots" id="guideShots"></div>
-          <p>IG 貼文圖：<strong>1080×1350（直式 4:5）</strong>，另有正方形、橫式、限動尺寸。一次最多做 <strong>10 頁</strong>，就係 IG carousel 嗰種可以左右掃嘅貼文。</p>
-          <p><strong>45 款版面 × 11 組配色</strong>，加埋自選顏色、手寫字體同裝飾，每頁都可以唔同樣。完成撳 <strong>Output</strong>，出 PNG，手機長按就入相簿。</p>
+          <p>IG 貼文圖：<strong>1080×1350（直式 4:5）</strong>，另有正方形、橫式、限動尺寸。一次最多做 <strong>10 頁</strong>，就是 IG carousel 那種可以左右滑的貼文。</p>
+          <p><strong>45 款版面 × 11 組配色</strong>，再加上自選顏色、手寫字體和裝飾，每頁都可以不一樣。完成後按 <strong>Output</strong>，輸出 PNG，手機長按就存進相簿。</p>
         </section>
 
         <section class="guide-slide" hidden>
@@ -1133,43 +1133,43 @@
               <b>左邊・設計</b>
               <span>版面：45 款，每 9 個一頁</span>
               <span>配色：11 組 ＋ 自選顏色</span>
-              <span>背景：上傳相 / AI 漸層</span>
+              <span>背景：上傳相片 / AI 漸層</span>
               <span>插圖：相片（可退地）、裝飾線</span>
             </div>
             <div class="guide-col is-mid">
               <b>中間・預覽</b>
-              <span>即時畫布，可拖字、縮放<br>下面啲圓點＝頁數<br>最後一頁向左掃＝加頁</span>
+              <span>即時畫布，可拖字、縮放<br>下面的圓點＝頁數<br>最後一頁向左滑＝加頁</span>
             </div>
             <div class="guide-col">
               <b>右邊・內容</b>
               <span>內容：全頁統一（標籤／配色／字體）</span>
               <span>片格：所有元素清單、鎖定</span>
-              <span>樣式：選中嗰件嘅所有調整</span>
+              <span>樣式：選中項目的所有調整</span>
             </div>
           </div>
-          <p><strong>手機版</strong>：畫布喺最上，下面「設計工具」同「編輯」兩條橫掣可以逐個摺埋（預設打開）。兩個都摺埋時畫布會自動放大，方便睇效果。</p>
+          <p><strong>手機版</strong>：畫布在最上，下面「設計工具」和「編輯」兩列可以分別收起（預設打開）。兩個都收起時畫布會自動放大，方便看效果。</p>
         </section>
 
         <section class="guide-slide" hidden>
-          <h3>點樣用（5 步）</h3>
+          <h3>怎樣用（5 步）</h3>
           <ol class="guide-steps">
-            <li><b>入內容</b> — 右邊「內容」打標題、副標。最頂「全頁統一」入一次標籤、配色、字體，全部頁都會跟。</li>
-            <li><b>揀版面</b> — 左邊「版面」揀一款，左右掃睇 5 組風格（基本／幾何／內容型／Fancy／手寫風）。</li>
-            <li><b>加背景</b> — 「背景」上傳相，再拉縮放同位置；或者用 AI 生成漸層背景。</li>
-            <li><b>加嘢同微調</b> — 「插圖」加相或裝飾線；喺畫布直接拖、揀中咗就去右邊「樣式」改色、字級、光暈。</li>
-            <li><b>加頁同出圖</b> — 畫布下面撳「＋」或喺最後一頁向左掃加新頁；最後撳右上角 <b>Output</b>。</li>
+            <li><b>輸入內容</b> — 右邊「內容」打標題、副標。最上面「全頁統一」輸入一次標籤、配色、字體，所有頁面都會跟著。</li>
+            <li><b>選版面</b> — 左邊「版面」選一款，左右滑看 5 組風格（基本／幾何／內容型／Fancy／手寫風）。</li>
+            <li><b>加背景</b> — 「背景」上傳相片，再調縮放和位置；或者用 AI 生成漸層背景。</li>
+            <li><b>加元素與微調</b> — 「插圖」加相片或裝飾線；在畫布直接拖動，選中後到右邊「樣式」改顏色、字級、光暈。</li>
+            <li><b>加頁與出圖</b> — 畫布下面按「＋」，或在最後一頁向左滑新增一頁；最後按右上角 <b>Output</b>。</li>
           </ol>
         </section>
 
         <section class="guide-slide" hidden>
-          <h3>有咩功能要記住</h3>
+          <h3>有什麼功能要記住</h3>
           <ul class="guide-list">
-            <li><b>自動儲存</b>：每次改嘢都會自動存喺你部機（唔會上載），唔小心閂咗 browser 或者撳走咗，下次開返同一條連結會自動接返落去。想由零開始，撳右上角「新設計」。</li>
-            <li><b>鎖定片格</b>：「片格」分頁撳鎖頭，鎖咗就唔會喺畫布誤郁。</li>
-            <li><b>多選對齊</b>：畫布上撳住 Shift／長按加選，右邊會出對齊同均分。</li>
-            <li><b>退地</b>：插圖選中後喺「樣式」開「退地」，自動去走淺色背景。</li>
-            <li><b>Output 存相簿</b>：撳 Output 會彈出張圖，iPhone／Android <b>長按張圖 →「加入照片」</b> 就入相簿；電腦右鍵另存。</li>
-            <li><b>預覽縮放</b>：畫布上面有 ＋／－、「符合視窗」同 100%。</li>
+            <li><b>自動儲存</b>：每次改動都會自動存在你的裝置上（不會上傳）。不小心關掉瀏覽器或按錯離開，下次開同一條連結會自動接回原處。想從零開始，按右上角「新設計」。</li>
+            <li><b>鎖定片格</b>：「片格」分頁按鎖頭，鎖上之後就不會在畫布上被誤移。</li>
+            <li><b>多選對齊</b>：畫布上按住 Shift／長按加選，右邊會出現對齊和均分。</li>
+            <li><b>退地</b>：插圖選中後在「樣式」開啟「退地」，自動去除淺色背景。</li>
+            <li><b>Output 存相簿</b>：按 Output 會彈出圖片，iPhone／Android <b>長按圖片 →「加入照片」</b> 就存進相簿；電腦右鍵另存。</li>
+            <li><b>預覽縮放</b>：畫布上面有 ＋／－、「符合視窗」和 100%。</li>
           </ul>
         </section>
 
@@ -1211,7 +1211,7 @@
   var customPal = { id:'custom', name:'自選', a:'#2b1055', b:'#7597de', ink:'#ffffff', accent:'#ffd166', band:'#120a26', onBand:'#ffffff' };
 
   /* ================= 字型 ================= */
-  /* 中文字型都附 CJK 備援；英文字型後面接思源黑體，令中英混排唔會爛 */
+  /* 中文字型都附 CJK 備援；英文字型後面接思源黑體，令中英混排不會亂 */
   var CJK_FB = "'Noto Sans TC', 'Noto Sans HK', sans-serif";
 
   var SANS       = "'Noto Sans TC', sans-serif";
@@ -1235,7 +1235,7 @@
   var FONT_GROUPS = [
     { label:'中文・標題', items:[
       { v:SANS,   n:'思源黑體 Noto Sans TC', note:'最百搭，粗體做標題好有力。' },
-      { v:SERIF,  n:'思源宋體 Noto Serif TC', note:'優雅、有雜誌感，適合標題同引言。' },
+      { v:SERIF,  n:'思源宋體 Noto Serif TC', note:'優雅、有雜誌感，適合標題和引言。' },
       { v:CHOCO,  n:'巧克力黑體 Chocolate', note:'圓潤古典，柔和標題。' }
     ]},
     { label:'中文・內文', items:[
@@ -1243,11 +1243,11 @@
       { v:SANS,    n:'思源黑體（內文）', note:'字重用 Regular／Medium 最好讀。' }
     ]},
     { label:'中文・手寫', items:[
-      { v:WENKAI, n:'霞鶩文楷 LXGW WenKai', note:'繁體手寫楷體，親切自然，標題內文都得。' }
+      { v:WENKAI, n:'霞鶩文楷 LXGW WenKai', note:'繁體手寫楷體，親切自然，標題和內文都適合。' }
     ]},
     { label:'英文・標題', items:[
       { v:ANTON,     n:'Anton', note:'超粗黑，海報標題。中文會自動用思源黑體。' },
-      { v:BEBAS,     n:'Bebas Neue', note:'高瘦大寫，數字同英文標題好靚。' },
+      { v:BEBAS,     n:'Bebas Neue', note:'高瘦大寫，數字和英文標題都好看。' },
       { v:SHOULDERS, n:'Big Shoulders', note:'壓縮字體，適合長標題。' },
       { v:ABRIL,     n:'Abril Fatface', note:'粗襯線，時尚雜誌感。' },
       { v:PLAYFAIR,  n:'Playfair Display', note:'高對比襯線，優雅。' }
@@ -1259,8 +1259,8 @@
     { label:'手寫 / Playful', items:[
       { v:CAVEAT,     n:'Caveat 手寫', note:'自然手寫感，中文會用霞鶩文楷。' },
       { v:MARKER,     n:'Permanent Marker 麥克筆', note:'粗麥克筆，貼紙／塗鴉風。' },
-      { v:PATRICK,    n:'Patrick Hand 手記', note:'圓潤手記體，好可愛。' },
-      { v:AMATIC,     n:'Amatic SC 細長手寫', note:'細長手寫，做小標籤好正。' },
+      { v:PATRICK,    n:'Patrick Hand 手記', note:'圓潤手記體，很可愛。' },
+      { v:AMATIC,     n:'Amatic SC 細長手寫', note:'細長手寫，做小標籤很合適。' },
       { v:SACRAMENTO, n:'Sacramento 花體', note:'花體簽名感，適合短句。' }
     ]}
   ];
@@ -2189,7 +2189,7 @@
 
         c.save();
         if (layer.shadow > 0 && !masked){
-          // 無遮罩（例如退地圖）時，canvas 會直接跟住透明度畫出輪廓陰影
+          // 無遮罩（例如退地圖）時，canvas 會直接跟著透明度畫出輪廓陰影
           c.shadowColor = 'rgba(0,0,0,' + (.55 * layer.shadow/100) + ')';
           c.shadowBlur = shBlur;
           c.shadowOffsetY = box.w * .03 * (layer.shadow/100);
@@ -2503,7 +2503,7 @@
 
   function addPage(clone){
     if (state.pages.length >= MAX_PAGES){
-      showToast('最多只可以做 ' + MAX_PAGES + ' 頁。', true);
+      showToast('最多只能做 ' + MAX_PAGES + ' 頁。', true);
       return;
     }
     var pg = clone ? clonePage(page()) : newPage(state.pages.length + 1);
@@ -2572,7 +2572,7 @@
       add.type = 'button';
       add.className = 'dot-add';
       add.textContent = '+';
-      add.title = '新增一頁（或喺最後一頁向左掃）';
+      add.title = '新增一頁（或在最後一頁向左滑）';
       add.addEventListener('click', function(){ addPage(false); });
       els.pageDots.appendChild(add);
     }
@@ -2631,7 +2631,7 @@
     return pg.layers.find(function(l){ return l.id === pg.activeId; }) || null;
   }
 
-  /* 多選：pg.sel 係 id 陣列，activeId 係最後選嗰個（面板顯示佢嘅數值） */
+  /* 多選：pg.sel 是 id 陣列，activeId 是最後選的那個（面板顯示它的數值） */
   function selIds(){ var pg = page(); if (!pg.sel) pg.sel = pg.activeId ? [pg.activeId] : []; return pg.sel; }
   function selection(){
     var pg = page();
@@ -2752,7 +2752,7 @@
           swipe.decided = 'page';
           els.canvasFrame.classList.add('is-swiping');
         } else {
-          swipe = null;                       // 垂直手勢 → 交返俾相片平移
+          swipe = null;                       // 垂直手勢 → 交回給相片平移
           if (hasPhoto()){
             imgDrag = { sx:pt.x, sy:pt.y, ox:pg.bg.imgX, oy:pg.bg.imgY };
           }
@@ -3442,8 +3442,8 @@
   var AI_ERRORS = {
     not_granted:'你尚未允許此頁面使用 Claude，AI 背景已停用。',
     rate_limited:'呼叫太頻繁，等一陣再生成。',
-    invalid_json:'今次回覆格式唔啱，再撳一次生成。',
-    refused:'呢個描述生成唔到，換個講法試吓。',
+    invalid_json:'這次回覆格式不正確，請再按一次生成。',
+    refused:'這個描述生成不到，換個說法再試。',
     session_expired:'請重新登入 Claude 再試。',
     cancelled:''
   };
@@ -3461,13 +3461,13 @@
       '依描述回覆一個 JSON 物件（只回 JSON，不要任何說明文字）：\n' +
       '{"name":"配方名(4-8個中文字)","base":"#RRGGBB","blobs":[{"x":0-1,"y":0-1,"r":0.25-1.1,"color":"#RRGGBB","alpha":0.35-0.95}],' +
       '"grain":0-0.1,"vignette":0-0.45,"mode":"light"或"dark","ink":"#RRGGBB"}\n' +
-      'blobs 放 4 至 6 個，位置分散、顏色互相協調；mode 指背景整體明暗；ink 是放喺此背景上仍然清楚可讀的文字顏色。\n' +
+      'blobs 放 4 至 6 個，位置分散、顏色互相協調；mode 指背景整體明暗；ink 是放在此背景上仍然清楚可讀的文字顏色。\n' +
       '描述：' + desc.slice(0, 400);
 
     sampleFn.json(prompt, { modelTier:'quick', cache:false })
       .then(function(raw){
         var art = sanitizeArt(raw);
-        if (!art){ showToast('今次回覆格式唔啱，再撳一次生成。', true); return; }
+        if (!art){ showToast('這次回覆格式不正確，請再按一次生成。', true); return; }
         var pg = page();
         pg.bg.kind = 'art'; pg.bg.art = art;
         if (art.ink){
@@ -3626,7 +3626,7 @@
     });
   }
 
-  /* ================= 自動儲存（存喺你部機，唔會上載） ================= */
+  /* ================= 自動儲存（存在你的裝置，不會上傳） ================= */
 
   var SAVE_KEY   = 'igpg-autosave-v1';
   var GUIDE_KEY  = 'igpg-guide-v1';
@@ -3848,7 +3848,7 @@
   }
 
   function newDoc(){
-    var msg = '開新設計？目前嘅 ' + state.pages.length + ' 頁會清走，無法復原。';
+    var msg = '開新設計？目前的 ' + state.pages.length + ' 頁會清除，無法復原。';
     if (!window.confirm(msg)) return;
     bgCaches = {};
     state.pages = [ newPage(1) ];
@@ -3868,7 +3868,7 @@
         if (!d) return;
         try {
           if (restoreDoc(d)){
-            showToast('已載入你上次未完成嘅設計（' + state.pages.length + ' 頁）。想由零開始撳右上角「新設計」。');
+            showToast('已載入你上次未完成的設計（' + state.pages.length + ' 頁）。想從零開始，按右上角「新設計」。');
           }
         } catch (e){}
       })
@@ -4083,7 +4083,7 @@
           bg.imgScale = 1; bg.imgX = .5; bg.imgY = .5;
           syncPhotoUI(); render(); renderTplThumbs(); schedulePageThumb();
         };
-        img.onerror = function(){ showToast('呢個檔案讀唔到，換一張試吓。', true); };
+        img.onerror = function(){ showToast('這個檔案讀不到，換一張再試。', true); };
         img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
@@ -4178,9 +4178,9 @@
           page().layers.push(layer);
           selectLayer(layer.id);
           focusStyleTab();
-          showToast('已加入插圖，可拖曳定位；下面可以開退地。');
+          showToast('已加入插圖，可拖曳定位；下面可以開啟退地。');
         };
-        img.onerror = function(){ showToast('呢個檔案讀唔到，換一張試吓。', true); };
+        img.onerror = function(){ showToast('這個檔案讀不到，換一張再試。', true); };
         img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
@@ -4260,9 +4260,9 @@
       if (state.globals.sync){
         applyPalette(page().pal);
         updateContent('tag', page().content.tag);
-        showToast('已開同步：標籤、配色、字體會套用到全部頁面。');
+        showToast('已開啟同步：標籤、配色、字體會套用到所有頁面。');
       } else {
-        showToast('已關同步：之後嘅改動只影響當前頁。');
+        showToast('已關閉同步：之後的改動只影響當前頁。');
       }
       scheduleSave();
     });
